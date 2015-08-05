@@ -1,10 +1,10 @@
 <?php
-	$online = true;
+	$online = false;
 
 	if(!$online)
 	{
 		$serverName = "localhost";
-		$databaseName = "reservering";
+		$databaseName = "dnd";
 		$databaseUserName = "root";
 		$databasePassword = "";
 	}

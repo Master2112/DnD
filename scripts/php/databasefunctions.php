@@ -56,7 +56,7 @@
 		return mail($to, $title, $message, "From: " . $from); //extra param for from: 'From
 	}
 	
-	function GetCharacters($id)
+	function GetCharacter($id)
 	{
 		$link = Connect();
 		
