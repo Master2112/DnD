@@ -1,6 +1,7 @@
 $(init);
 var mainContentBox;
 var user = null;
+var character = null;
 
 function init()
 {
@@ -137,11 +138,22 @@ function addAllUserCharacters(data)
 		console.log(character);
 	
 		$("#characterlist").append("<div class='characterinfo' id='char" + data[i].id + "'>");
-		$(".characterinfo").append(data[i].info.name);
+		$("#char" + charId).append("<div id=char" + charId + "info></div>")
+		$("#char" + charId + "info").append(data[i].info.name);
+		
+		console.log("starting chartest");
+		$("#char" + charId).append("<br>");
+		character.openInventory();
+		$("#char" + charId).append(character.tempInventory.toHTML());
+		
+		character.saveInServer();
+		console.log("ending chartest");
+		
+		$("#char" + charId).append("</div>");
 		
 		if(data[i].assignedGame == -1)
 		{
-			$("#characterlist").append(" - Available");
+			$("#char" + charId + "info").append(" - Available");
 		}
 		else
 		{
@@ -153,20 +165,31 @@ function addAllUserCharacters(data)
 				url: "scripts/php/getgamebyid.php?id=" + data[i].assignedGameId,
 				success: function(data)
 				{
-					$("#char" + charId).append(" - On Quest: " + data.name);
+					$("#char" + charId + "info").append(" - On Quest: " + data.name);
 					console.log(charId + ", " + data.name);
 				}
 			});
 		}
-		
-		$("#characterlist").append("</div>");
-		
 	}
 }
 
 function Character(json)
 {
 	this.data = json;
+	this.tempInventory = null;
+	
+	this.saveInServer = function()
+	{
+		var thisAsJson = JSON.stringify(this);
+		
+		var request = new XMLHttpRequestObject();
+		request.open("POST", "savecharacter.php", true);
+		request.setRequestHeader("Content-type", "application/json");
+
+		request.send(thisAsJson);
+		console.log("SAVING TO SERVER");
+		console.log(thisAsJson);
+	}
 	
 	this.calculateStatModifier = function(statValue)
 	{
@@ -190,4 +213,91 @@ function Character(json)
 			case 30: return 10;
 		}
 	}
+	
+	this.openInventory = function()
+	{
+		console.log("Opening inventory of character: " + this.data.name);
+		
+		if(this.data.inventory == "")
+		{
+			console.log("No saved inventory exists, making one now.");
+			this.tempInventory = new InventoryObject("Inventory", "Everything you have with you!", 1, 0, true);
+			this.saveInventory();
+		}
+		else
+		{
+			console.log("Existing inventory found. Opening...");
+			this.tempInventory = atob(this.data.inventory);
+			console.log(this.tempInventory);
+		}	
+	}
+	
+	this.addToInventory = function(newObject)
+	{
+		if(this.tempInventory == null)
+			this.openInventory();
+			
+		tempInventory.push(newObject);
+		
+		this.saveInventory();
+	}
+	
+	this.saveInventory = function()
+	{
+		this.data.inventory = btoa(this.tempInventory);
+		this.tempInventory = null;
+	}
+}
+
+function InventoryObject(name, description, quantity = 1, weight = 0, canContain = false, contents = null)
+{
+	this.name = name;
+	this.description = description;
+	this.weight = weight;
+	this.canContain = canContain;
+	this.quantity = quantity;
+	
+	this.toHTML = function()
+	{
+		var baseElement = $("<div class='inventoryItem'></div>");
+		$(baseElement).append($("<div class='inventoryItemField'>" + this.name + "</div>"));
+		$(baseElement).append($("<div class='inventoryItemField'>" + this.quantity + "</div>"));
+		$(baseElement).append($("<br>"));
+		$(baseElement).append($("<div class='inventoryItemField'>" + this.weight + "kg (total: " + this.getTotalWeight() + "kg)</div>"));
+		$(baseElement).append($("<br>"));
+		$(baseElement).append($("<div class='inventoryItemField'>" + this.description + "</div>"));
+		
+		if(this.canContain)
+		{
+			$(baseElement).append($("<br>"));
+			var container = $(baseElement).append($("<div class='inventoryItemContents'></div>"));
+			
+			for(var i = 0; i < contents.length; i++)
+			{
+				$(container).append(contents[i].toHTML());
+			}
+		}
+		
+		return $(baseElement);
+	}
+	
+	this.addToInventory = function(newObject)
+	{	
+		if(canContain)
+		{
+			contents.push(newObject);
+		}
+	}
+	
+	this.getTotalWeight = function()
+	{
+		return this.weight * this.quantity;
+	}
+	
+	if(contents != null)
+		this.contents = contents;
+	else if(canContain)
+		this.contents = [];
+	else
+		this.contents = null;
 }
