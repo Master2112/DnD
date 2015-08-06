@@ -98,6 +98,27 @@ class Character
 		$this->stats->bonusses->skills->survival = $d[$this->next()] == 1;
 		
 		$this->stats->bonusses->passiveWisdom = (int)$d[$this->next()];
+		
+		$this->stats->bonusses->expertise = new Collection();
+		$this->stats->bonusses->expertise->acrobatics = $d[$this->next()] == 1;
+		$this->stats->bonusses->expertise->animalHandling = $d[$this->next()] == 1;
+		$this->stats->bonusses->expertise->arcana = $d[$this->next()] == 1;
+		$this->stats->bonusses->expertise->athletics = $d[$this->next()] == 1;
+		$this->stats->bonusses->expertise->deception = $d[$this->next()] == 1;
+		$this->stats->bonusses->expertise->history = $d[$this->next()] == 1;
+		$this->stats->bonusses->expertise->insight = $d[$this->next()] == 1;
+		$this->stats->bonusses->expertise->intimidation = $d[$this->next()] == 1;
+		$this->stats->bonusses->expertise->investigation = $d[$this->next()] == 1;
+		$this->stats->bonusses->expertise->medicine = $d[$this->next()] == 1;
+		$this->stats->bonusses->expertise->nature = $d[$this->next()] == 1;
+		$this->stats->bonusses->expertise->perception = $d[$this->next()] == 1;
+		$this->stats->bonusses->expertise->performance = $d[$this->next()] == 1;
+		$this->stats->bonusses->expertise->persuasion = $d[$this->next()] == 1;
+		$this->stats->bonusses->expertise->religion = $d[$this->next()] == 1;
+		$this->stats->bonusses->expertise->sleighOfHand = $d[$this->next()] == 1;
+		$this->stats->bonusses->expertise->stealth = $d[$this->next()] == 1;
+		$this->stats->bonusses->expertise->survival = $d[$this->next()] == 1;
+		
 		$this->stats->initiative = (int)$d[$this->next()];
 		$this->hitDice = $d[$this->next()];
 		

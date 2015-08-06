@@ -133,6 +133,9 @@ function addAllUserCharacters(data)
 {
 	for(var i = 0; i < data.length; i++)
 	{
+		var character = new Character(data[i]);
+		console.log(character);
+	
 		$("#characterlist").append("<div class='characterinfo' id='char" + data[i].id + "'>");
 		$(".characterinfo").append(data[i].info.name);
 		
@@ -150,7 +153,7 @@ function addAllUserCharacters(data)
 				url: "scripts/php/getgamebyid.php?id=" + data[i].assignedGameId,
 				success: function(data)
 				{
-					$("#char" + charId).append(" - Quest: " + data.name);
+					$("#char" + charId).append(" - On Quest: " + data.name);
 					console.log(charId + ", " + data.name);
 				}
 			});
@@ -158,5 +161,33 @@ function addAllUserCharacters(data)
 		
 		$("#characterlist").append("</div>");
 		
+	}
+}
+
+function Character(json)
+{
+	this.data = json;
+	
+	this.calculateStatModifier = function(statValue)
+	{
+		switch(statValue)
+		{
+			case 1: return -5;
+			case 2: case 3: return -4;
+			case 4: case 5: return -3;
+			case 6: case 7: return -2;
+			case 8: case 9: return -1;
+			case 10: case 11: return 0;
+			case 12: case 13: return 1;
+			case 14: case 15: return 2;
+			case 16: case 17: return 3;
+			case 18: case 19: return 4;
+			case 20: case 21: return 5;
+			case 22: case 23: return 6;
+			case 24: case 25: return 7;
+			case 26: case 27: return 8;
+			case 28: case 29: return 9;
+			case 30: return 10;
+		}
 	}
 }
