@@ -1,5 +1,7 @@
 <?php
 
+	class Collection{}
+
 	function NavigateToPage($page)
 	{
 		header("Location: " . $page);
@@ -53,7 +55,7 @@
 	function Email($to, $from, $title, $message)
 	{
 		StartSessionIfNeeded();
-		return mail($to, $title, $message, "From: " . $from); //extra param for from: 'From
+		return mail($to, $title, $message, "From: " . $from);
 	}
 	
 	function GetCharacter($id)
@@ -62,11 +64,70 @@
 		
 		$result = mysqli_query($link, "SELECT * FROM `characters` WHERE `id`=$id"); 
 		
-		$lesson = mysqli_fetch_row($result); 
+		$obj = mysqli_fetch_row($result); 
 
 		Disconnect($link);
 		
-		return $lesson;
+		return $obj;
+	}
+	
+	function GetGame($id)
+	{
+		$link = Connect();
+		
+		$result = mysqli_query($link, "SELECT * FROM `games` WHERE `id`=$id"); 
+		
+		if($result != false)
+		{
+			$obj = mysqli_fetch_row($result); 
+		}
+		else
+		{
+			$obj = null;
+		}
+		
+		Disconnect($link);
+		
+		return $obj;
+	}
+	
+	function GetCharactersInGame($gameId)
+	{
+		$link = Connect();
+		
+		$result = mysqli_query($link, "SELECT * FROM `characters` WHERE `assignedgameid`=$gameId"); 
+		
+		$obj = mysqli_fetch_all($result); 
+
+		Disconnect($link);
+		
+		return $obj;
+	}
+	
+	function GetCharactersFromUser($userId)
+	{
+		$link = Connect();
+		
+		$result = mysqli_query($link, "SELECT * FROM `characters` WHERE `assignedgameid`=$userId"); 
+		
+		$obj = mysqli_fetch_all($result); 
+
+		Disconnect($link);
+		
+		return $obj;
+	}
+	
+	function GetPlayerById($id)
+	{
+		$link = Connect();
+		
+		$result = mysqli_query($link, "SELECT * FROM `users` WHERE `id`=$id"); 
+		
+		$obj = mysqli_fetch_row($result); 
+
+		Disconnect($link);
+		
+		return $obj;
 	}
 	
 	function Disconnect($toDisconnect)
@@ -74,11 +135,11 @@
 		mysqli_close($toDisconnect); //sluit de link
 	}
 	
-	function EditUserData($idToEdit, $newName, $newEmail, $newPassword, $newAdmin, $newPhone, $thenLogin = true)
+	function EditUserData($idToEdit, $newName, $newEmail, $newPassword, $thenLogin = true)
 	{
 		$link = Connect();
 	
-		$sql = "UPDATE `users` SET `name` = '$newName', `email` = '$newEmail', `password` = '$newPassword', `administrator` = '$newAdmin', `phonenumber` = '$newPhone' WHERE `id` = '$idToEdit';";
+		$sql = "UPDATE `users` SET `name` = '$newName', `email` = '$newEmail', `password` = '$newPassword' WHERE `id` = '$idToEdit';";
 		
 		mysqli_query($link, $sql);
 		
@@ -87,7 +148,7 @@
 		if($thenLogin)
 			AttemptLogin($newName, $newPassword);
 			
-		Email($newEmail, "info@bewustwedstrijdrijden.nl", "Je gebruikersaccount", "Uw gebruikersinfo is gewijzigd. De nieuwe info is: Name: " . $newName . ", Wachtwoord: " . $newPassword . ". Bekijk je hele profiel op bewustwedstrijdrijden.nl/aanmelden/");
+		Email($newEmail, "robot@timfalken.com", "DnD Account", "Your info has been edited! Your new name is: " . $newName . ", your password is: " . $newPassword . ". Check all other stuff online on http://www.timfalken.com/dnd/");
 	}
 	
 	function AttemptLogin($email, $password)
@@ -103,21 +164,20 @@
 		if($password == $user[3])
 		{
 			$_SESSION["currentUser"] = $user;
-			return true;
 		}
 		
-		return false;
+		return $user;
 	}
 	
-	function RegisterNewUser($username, $email, $password, $phoneNumber)
+	function RegisterNewUser($username, $email, $password)
 	{
 		$success = false;
 	
 		$link  = Connect();
 	
-		$sql = "INSERT INTO `users` (name, email, password, phonenumber) VALUES ('$username', '$email', '$password', '$phoneNumber')";
+		$sql = "INSERT INTO `users` (name, email, password) VALUES ('$username', '$email', '$password')";
 
-		$result = mysqli_query($link, "SELECT * FROM `users` WHERE name='$username'"); 
+		$result = mysqli_query($link, "SELECT * FROM `users` WHERE email='$email'"); 
 		
 		$existingUser = mysqli_fetch_row($result);
 		
@@ -125,7 +185,7 @@
 		{
 			mysqli_query($link, $sql);
 			
-			EmailAccountData();
+			//EmailAccountData();
 			
 			$success = true;
 		}
