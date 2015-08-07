@@ -6,11 +6,10 @@
 .inventoryItem
 {
 	float: left;
-	width: 300px;
-	max-height: 1000px;
+	width: auto;
 	background-color: silver;
 	padding-top: 5px;
-	margin-top: 10px;
+	margin: 5px;
 	border: 1px solid black;
 }
 
@@ -18,23 +17,24 @@
 {
 	float: left;
 	width: 90%;
-	height: 600px;
-	max-height: 600px;
+	height: auto;
 }
 
 .inventoryItemField
 {
 	background-color: gray;
 	margin: 3px;
-	overflow-y: scroll;
-	max-height: 100px;
+	/*overflow-y: scroll;*/
+	height: auto;
 }
 
 .inventoryItemContents
 {
 	background-color: gray;
 	width: auto;
-	height: 50%;
-	overflow-y: scroll;
-	margin: 3px;
+	height: auto;
+	padding: 3px;
+	/*overflow-y: scroll;*/
+	overflow: auto;
+	margin: 5px;
 }

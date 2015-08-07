@@ -108,7 +108,7 @@
 	{
 		$link = Connect();
 		
-		$result = mysqli_query($link, "SELECT * FROM `characters` WHERE `assignedgameid`=$userId"); 
+		$result = mysqli_query($link, "SELECT * FROM `characters` WHERE `ownerid`=$userId"); 
 		
 		$obj = mysqli_fetch_all($result); 
 

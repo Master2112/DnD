@@ -160,9 +160,10 @@ function populateCharacterDiv(charData)
 	$("#char" + charData.id).children(".inventoryItem").attr("class", "inventoryItem inventory");
 	
 	//New Item
-	$("#char" + charData.id).append($("<div id='newItemFor" + charData.id + "'></div>"));
+	$("#char" + charData.id).append("<br>");
+	$("#char" + charData.id).append($("<div class='inventoryItem' id='newItemFor" + charData.id + "'></div>"));
 	
-	$("#newItemFor" + charData.id).append("<div>New Item Parameters<br>");
+	$("#newItemFor" + charData.id).append("<br>New Item Parameters<br>");
 	$("#newItemFor" + charData.id).append("Name: ");
 	$("#newItemFor" + charData.id).append($("<input type='text' placeholder='Name' id='name'/>"));
 	$("#newItemFor" + charData.id).append("<br>Quantity: ");
@@ -173,7 +174,6 @@ function populateCharacterDiv(charData)
 	$("#newItemFor" + charData.id).append($("<input type='text' placeholder='Description and Effects' id='description'/>"));
 	$("#newItemFor" + charData.id).append("<br>Is a container?: ");
 	$("#newItemFor" + charData.id).append($("<input type='checkbox' id='container'/>"));
-	$("#newItemFor" + charData.id).append("</div>");
 	//character.saveInServer(); //TODO: REMOVE THIS WHEN NO LONGER NEEDED
 	console.log("ending chartest");
 	
@@ -290,10 +290,9 @@ function Character(json)
 		{
 			console.log("No saved inventory exists, making one now.");
 			this.tempInventory = new InventoryObject(this.data.id, "Inventory", "Everything you have with you!", 1, 0, true);
-			tempInventory.isRoot = true;
+			this.tempInventory.isRoot = true;
 			console.log(this.tempInventory);
 			this.saveInventory();
-			
 		}
 		
 		console.log("Existing inventory found. Opening...");
@@ -360,15 +359,107 @@ function InventoryObject(ownerId, name, description, quantity, weight, canContai
 	this.toHTML = function()
 	{
 		var baseElement = $("<div class='inventoryItem'></div>");
-		$(baseElement).append($("<div class='inventoryItemField'>" + this.name + " x" + this.quantity + "</div>"));
+		$(baseElement).append($("<div class='inventoryItemField' id='name'>" + this.name + " x" + this.quantity + "</div>"));
+		
+		if(!this.isRoot)
+		{
+			$(baseElement).append($("<input type='text' class='inventoryItemField', id='nameEditable' value='" + this.name + "'/>"));
+			$(baseElement).children("#nameEditable").hide();
+			
+			$(baseElement).append($("<input type='button' id='editNameBtn' charId='" + this.ownerId + "' value='Edit Name'/>"));
+			$(baseElement).append("<br>");
+			$(baseElement).find("#editNameBtn").on("click", {obj: this, baseE: baseElement}, function(event)
+			{
+				$(event.data.baseE).children("#name").hide();
+				$(event.data.baseE).children("#nameEditable").show();
+				
+				$(event.data.baseE).children("#editNameBtn").hide();
+				$(event.data.baseE).children("#saveNameBtn").show();
+				
+				event.stopImmediatePropagation()
+				return false;
+			});
+			
+			$(baseElement).append($("<input type='button' id='saveNameBtn' charId='" + this.ownerId + "' value='Save'/>"));
+			$(baseElement).find("#saveNameBtn").on("click", {obj: this, baseE: baseElement}, function(event)
+			{
+				event.data.obj.name = $(event.data.baseE).children("#nameEditable").val(); 
+				saveAll();
+				
+				event.stopImmediatePropagation()
+				return false;
+			});
+			
+			$(baseElement).children("#saveNameBtn").hide();
+		}//end edits
+		
+		if(!this.canContain)
+		{
+			$(baseElement).append($("<input type='button' id='addOneBtn' charId='" + this.ownerId + "' value='+'/>"));
+			$(baseElement).find("#addOneBtn").on("click", {obj: this}, function(event)
+			{
+				console.log("Increasing item quantity by one");
+				console.log(event.data.obj);
+				
+				event.data.obj.quantity++;
+				saveAll();
+				
+				event.stopImmediatePropagation()
+				return false;
+			});
+			
+			$(baseElement).append($("<input type='button' id='remOneBtn' charId='" + this.ownerId + "' value='-'/>"));
+			$(baseElement).find("#remOneBtn").on("click", {obj: this}, function(event)
+			{
+				console.log("Decreasing item quantity by one");
+				console.log(event.data.obj);
+				
+				event.data.obj.quantity--;
+				saveAll();
+				
+				event.stopImmediatePropagation()
+				return false;
+			});
+		}
 		
 		if(this.weight > 0)
 		{
 			$(baseElement).append($("<div class='inventoryItemField'>" + this.weight + "kg (total: " + this.getTotalWeight() + "kg)</div>"));
-			$(baseElement).append($("<br>"));
 		}
 		
-		$(baseElement).append($("<div class='inventoryItemField'>" + this.description + "</div>"));
+		$(baseElement).append($("<div class='inventoryItemField', id='description'>" + this.description + "</div>"));
+		
+		if(!this.isRoot)
+		{
+			$(baseElement).append($("<input type='text' class='inventoryItemField', id='descriptionEditable' value='" + this.description + "'/>"));
+			$(baseElement).children("#descriptionEditable").hide();
+			
+			$(baseElement).append($("<input type='button' id='editDescrBtn' charId='" + this.ownerId + "' value='Edit Description'/>"));
+			$(baseElement).append("<br>");
+			$(baseElement).find("#editDescrBtn").on("click", {obj: this, baseE: baseElement}, function(event)
+			{
+				$(event.data.baseE).children("#description").hide();
+				$(event.data.baseE).children("#descriptionEditable").show();
+				
+				$(event.data.baseE).children("#editDescrBtn").hide();
+				$(event.data.baseE).children("#saveDescrBtn").show();
+				
+				event.stopImmediatePropagation()
+				return false;
+			});
+			
+			$(baseElement).append($("<input type='button' id='saveDescrBtn' charId='" + this.ownerId + "' value='Save'/>"));
+			$(baseElement).find("#saveDescrBtn").on("click", {obj: this, baseE: baseElement}, function(event)
+			{
+				event.data.obj.description = $(event.data.baseE).children("#descriptionEditable").val(); 
+				saveAll();
+				
+				event.stopImmediatePropagation()
+				return false;
+			});
+			
+			$(baseElement).children("#saveDescrBtn").hide();
+		}
 		
 		if(this.canContain)
 		{
@@ -385,6 +476,7 @@ function InventoryObject(ownerId, name, description, quantity, weight, canContai
 				$(container).append(this.contents[i].toHTML());
 			}
 			
+			$(baseElement).append("<br>");
 			$(baseElement).append($("<input type='button' id='addBtn' charId='" + this.ownerId + "' value='Add new item here'/>"));
 			$(baseElement).find("#addBtn").on("click", {obj: this}, function(event)
 			{
@@ -470,8 +562,8 @@ function InventoryObject(ownerId, name, description, quantity, weight, canContai
 										$(newItemElement).find("#weight").val(),
 										$(newItemElement).find("#container")[0].checked);
 		
-		if(newobj.canContain)
-			newobj.quantity = 1;
+		if(newObj.canContain)
+			newObj.quantity = 1;
 		
 		console.log("Toggle value:");
 		console.log($(newItemElement).find("#container")[0].checked);
