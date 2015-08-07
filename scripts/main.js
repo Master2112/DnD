@@ -438,11 +438,11 @@ function InventoryObject(ownerId, name, description, quantity, weight, canContai
 			$(baseElement).append($("<div class='inventoryItemField'>" + this.weight + "kg (total: " + this.getTotalWeight() + "kg)</div>"));
 		}
 		
-		$(baseElement).append($("<div class='inventoryItemField', id='description'>" + this.description + "</div>"));
+		$(baseElement).append($("<div class='inventoryItemField', id='description'>" + this.description.replace(/\r?\n/g, '<br />') + "</div>"));
 		
 		if(!this.isRoot)
 		{
-			$(baseElement).append($('<input type="text" class="inventoryItemField", id="descriptionEditable" value="' + this.description.replace('"', "'") + '"/>'));
+			$(baseElement).append($('<textarea class="inventoryItemField", id="descriptionEditable">' + this.description + '</textarea>'));
 			$(baseElement).children("#descriptionEditable").hide();
 			
 			$(baseElement).append($("<input type='button' id='editDescrBtn' charId='" + this.ownerId + "' value='Edit Description'/>"));
