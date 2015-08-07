@@ -206,6 +206,12 @@ function populateCharacterDiv(charData)
 	$("#char" + character.data.id).children("#status").append($("<div class=charField id='hitPoints'>Hit Points: " + character.data.status.currentHealth + "</div>"));
 	$("#char" + character.data.id).children("#status").append($("<div class=charField id='hitDice'>Hit Dice: " + character.data.hitDice + "</div>"));
 	
+	$("#char" + character.data.id).append($("<div class=charCategory id='personality'>Personality:<br></div>"));
+	$("#char" + character.data.id).children("#personality").append($("<div class=charField id='traits'><b>Traits:</b><br>" + character.data.personality.traits.replace(/\r?\n/g, '<br />') + "</div>"));
+	$("#char" + character.data.id).children("#personality").append($("<div class=charField id='ideals'><b>Ideals:</b><br>" + character.data.personality.ideals.replace(/\r?\n/g, '<br />') + "</div>"));
+	$("#char" + character.data.id).children("#personality").append($("<div class=charField id='bonds'><b>Bonds:</b><br>" + character.data.personality.bonds.replace(/\r?\n/g, '<br />') + "</div>"));
+	$("#char" + character.data.id).children("#personality").append($("<div class=charField id='flaws'><b>Flaws:</b><br>" + character.data.personality.flaws.replace(/\r?\n/g, '<br />') + "</div>"));
+	
 	$("#char" + character.data.id).append("<br>");
 	character.openInventory();
 	$("#char" + charData.id).append(character.tempInventory.toHTML());
@@ -366,17 +372,6 @@ function Character(json)
 	this.openInventory();
 }
 
-function addslashes(string) {
-    return string.replace(/\\/g, '\\\\').
-        replace(/\u0008/g, '\\b').
-        replace(/\t/g, '\\t').
-        replace(/\n/g, '\\n').
-        replace(/\f/g, '\\f').
-        replace(/\r/g, '\\r').
-        replace(/'/g, '\\\'').
-        replace(/"/g, '\\"');
-}
-
 function InventoryObject(ownerId, name, description, quantity, weight, canContain, contents)
 {
 	this.isRoot = false;
@@ -435,6 +430,12 @@ function InventoryObject(ownerId, name, description, quantity, weight, canContai
 			$(baseElement).append($('<input type="text" class="inventoryItemField", id="nameEditable" value="' + this.name.replace('"', "'") + '"/>'));
 			$(baseElement).children("#nameEditable").hide();
 			
+			if(!this.canContain)
+			{
+				$(baseElement).append($("<input type='button' id='addOneBtn' charId='" + this.ownerId + "' value='+'/>"));
+				$(baseElement).append($("<input type='button' id='remOneBtn' charId='" + this.ownerId + "' value='-'/>"));
+			}
+			
 			$(baseElement).append($("<input type='button' id='editNameBtn' charId='" + this.ownerId + "' value='Edit Name'/>"));
 			$(baseElement).append("<br>");
 			$(baseElement).find("#editNameBtn").on("click", {obj: this, baseE: baseElement}, function(event)
@@ -464,7 +465,6 @@ function InventoryObject(ownerId, name, description, quantity, weight, canContai
 		
 		if(!this.canContain)
 		{
-			$(baseElement).append($("<input type='button' id='addOneBtn' charId='" + this.ownerId + "' value='+'/>"));
 			$(baseElement).find("#addOneBtn").on("click", {obj: this}, function(event)
 			{
 				console.log("Increasing item quantity by one");
@@ -477,7 +477,7 @@ function InventoryObject(ownerId, name, description, quantity, weight, canContai
 				return false;
 			});
 			
-			$(baseElement).append($("<input type='button' id='remOneBtn' charId='" + this.ownerId + "' value='-'/>"));
+			
 			$(baseElement).find("#remOneBtn").on("click", {obj: this}, function(event)
 			{
 				console.log("Decreasing item quantity by one");
