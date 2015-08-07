@@ -94,7 +94,9 @@ $bigassSQL = "UPDATE `characters` SET"
 		. "`hassurvivalexpertise` = '" . $char->data->stats->bonusses->expertise->survival . "',"
 		. "`initiative` = '" . $char->data->stats->initiative . "',"
 		. "`hitdice` = '" . $char->data->hitDice . "',"
-		. "`spellcastingclass` = '" . addslashes($char->data->spellcasting->casterClass) . "'"
+		. "`spellcastingclass` = '" . addslashes($char->data->spellcasting->casterClass) . "',"
+		. "`class` = '" . $char->data->info->class . "',"
+		. "`hitdice` = '" . $char->data->status->maxHitPoints . "'"
 		. "WHERE `id` = '" . $char->data->id . "';";
 		
 $connection = Connect();

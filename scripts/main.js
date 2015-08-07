@@ -146,14 +146,67 @@ function populateCharacterDiv(charData)
 	var character = new Character(charData);
 	characters.push(character);
 	console.log(character);
-
-	$("#char" + charData.id).html("");
 	
-	$("#char" + charData.id).append("<div id='char" + charData.id + "info'></div>")
-	$("#char" + charData.id + "info").append(charData.info.name);
+	$("#char" + character.data.id).html("");
 	
-	console.log("starting chartest");
-	$("#char" + charData.id).append("<br>");
+	$("#char" + character.data.id).append($("<div class='charCategory' id='name'>Lvl" + character.data.info.level + " " + character.data.info.name + "</div>"));
+	$("#char" + character.data.id).append($("<div class='charCategory' id='quest'></div>"));
+	
+	$("#char" + character.data.id).append($("<div class=charCategory id='basicInfo'></div>"));
+	
+	$("#char" + character.data.id).children("#basicInfo").append($("<div class=charField id='class'>Class: " + character.data.info.class + "</div>"));
+	$("#char" + character.data.id).children("#basicInfo").append($("<div class=charField id='background'>Background: " + character.data.info.background + "</div>"));
+	$("#char" + character.data.id).children("#basicInfo").append($("<div class=charField id='race'>Race: " + character.data.info.race + "</div>"));
+	$("#char" + character.data.id).children("#basicInfo").append($("<div class=charField id='alignment'>Alignment: " + character.data.info.alignment + "</div>"));
+	$("#char" + character.data.id).children("#basicInfo").append($("<div class=charField id='experience'>Experience Points: " + character.data.info.experience + "</div>"));
+	
+	$("#char" + character.data.id).append($("<div class=charCategory id='stats'></div>"));//TODO (+5)
+	$("#char" + character.data.id).children("#stats").append($("<div class=charField id='strength'>Strength: " + character.data.stats.strength + "(+" + character.calculateStatModifier(character.data.stats.strength) + ")</div>"));
+	$("#char" + character.data.id).children("#stats").append($("<div class=charField id='dexterity'>Dexterity: " + character.data.stats.dexterity + "(+" + character.calculateStatModifier(character.data.stats.dexterity) + ")</div>"));
+	$("#char" + character.data.id).children("#stats").append($("<div class=charField id='constitution'>Constitution: " + character.data.stats.constitution + "(+" + character.calculateStatModifier(character.data.stats.constitution) + ")</div>"));
+	$("#char" + character.data.id).children("#stats").append($("<div class=charField id='intelligence'>Intelligence: " + character.data.stats.intelligence + "(+" + character.calculateStatModifier(character.data.stats.intelligence) + ")</div>"));
+	$("#char" + character.data.id).children("#stats").append($("<div class=charField id='wisdom'>Wisdom: " + character.data.stats.wisdom + "(+" + character.calculateStatModifier(character.data.stats.wisdom) + ")</div>"));
+	$("#char" + character.data.id).children("#stats").append($("<div class=charField id='charisma'>Charisma: " + character.data.stats.charisma + "(+" + character.calculateStatModifier(character.data.stats.charisma) + ")</div>"));
+	
+	$("#char" + character.data.id).append($("<div class=charCategory id='saving'>Saving Throws:<br></div>"));
+	$("#char" + character.data.id).children("#saving").append($("<div class=charField id='strength'>Strength: +" + (character.calculateStatModifier(character.data.stats.strength) + (character.data.stats.bonusses.savingThrows.strength? character.getProficiencyBonus() : 0)) + (character.data.stats.bonusses.savingThrows.strength? " (P)" : "") + "</div>"));
+	$("#char" + character.data.id).children("#saving").append($("<div class=charField id='dexterity'>Dexterity: +" + (character.calculateStatModifier(character.data.stats.dexterity) + (character.data.stats.bonusses.savingThrows.dexterity? character.getProficiencyBonus() : 0)) + (character.data.stats.bonusses.savingThrows.dexterity? " (P)" : "") + "</div>"));
+	$("#char" + character.data.id).children("#saving").append($("<div class=charField id='constitution'>Constitution: +" + (character.calculateStatModifier(character.data.stats.constitution) + (character.data.stats.bonusses.savingThrows.constitution? character.getProficiencyBonus() : 0)) + (character.data.stats.bonusses.savingThrows.constitution? " (P)" : "") + "</div>"));
+	$("#char" + character.data.id).children("#saving").append($("<div class=charField id='intelligence'>Intelligence: +" + (character.calculateStatModifier(character.data.stats.intelligence) + (character.data.stats.bonusses.savingThrows.intelligence? character.getProficiencyBonus() : 0)) + (character.data.stats.bonusses.savingThrows.intelligence? " (P)" : "") + "</div>"));
+	$("#char" + character.data.id).children("#saving").append($("<div class=charField id='wisdom'>Wisdom: +" + (character.calculateStatModifier(character.data.stats.wisdom) + (character.data.stats.bonusses.savingThrows.wisdom? character.getProficiencyBonus() : 0)) + (character.data.stats.bonusses.savingThrows.wisdom? " (P)" : "") + "</div>"));
+	$("#char" + character.data.id).children("#saving").append($("<div class=charField id='charisma'>Charisma: +" + (character.calculateStatModifier(character.data.stats.charisma) + (character.data.stats.bonusses.savingThrows.charisma? character.getProficiencyBonus() : 0)) + (character.data.stats.bonusses.savingThrows.charisma? " (P)" : "") + "</div>"));
+	
+	$("#char" + character.data.id).append($("<div class=charCategory id='skills'>Skills:<br></div>"));
+	$("#char" + character.data.id).children("#skills").append($("<div class=charField id='acrobatics'>Acrobatics: +" + (character.calculateStatModifier(character.data.stats.dexterity) + ((character.data.stats.bonusses.skills.acrobatics? character.getProficiencyBonus() : 0) * (character.data.stats.bonusses.expertise.acrobatics? 2 : 1))) + (character.data.stats.bonusses.skills.acrobatics? " (P)" : "") + (character.data.stats.bonusses.expertise.acrobatics? " (E)" : "") + "</div>"));
+	$("#char" + character.data.id).children("#skills").append($("<div class=charField id='animalHandling'>Animal Handling: +" + (character.calculateStatModifier(character.data.stats.wisdom) + ((character.data.stats.bonusses.skills.animalHandling? character.getProficiencyBonus() : 0) * (character.data.stats.bonusses.expertise.animalHandling? 2 : 1))) + (character.data.stats.bonusses.skills.animalHandling? " (P)" : "") + (character.data.stats.bonusses.expertise.animalHandling? " (E)" : "") + "</div>"));
+	$("#char" + character.data.id).children("#skills").append($("<div class=charField id='arcana'>Arcana: +" + (character.calculateStatModifier(character.data.stats.intelligence) + ((character.data.stats.bonusses.skills.arcana? character.getProficiencyBonus() : 0) * (character.data.stats.bonusses.expertise.arcana? 2 : 1))) + (character.data.stats.bonusses.skills.arcana? " (P)" : "") + (character.data.stats.bonusses.expertise.arcana? " (E)" : "") + "</div>"));
+	$("#char" + character.data.id).children("#skills").append($("<div class=charField id='athletics'>Athletics: +" + (character.calculateStatModifier(character.data.stats.strength) + ((character.data.stats.bonusses.skills.athletics? character.getProficiencyBonus() : 0) * (character.data.stats.bonusses.expertise.athletics? 2 : 1))) + (character.data.stats.bonusses.skills.athletics? " (P)" : "") + (character.data.stats.bonusses.expertise.athletics? " (E)" : "") + "</div>"));
+	$("#char" + character.data.id).children("#skills").append($("<div class=charField id='deception'>Deception: +" + (character.calculateStatModifier(character.data.stats.charisma) + ((character.data.stats.bonusses.skills.deception? character.getProficiencyBonus() : 0) * (character.data.stats.bonusses.expertise.deception? 2 : 1))) + (character.data.stats.bonusses.skills.deception? " (P)" : "") + (character.data.stats.bonusses.expertise.deception? " (E)" : "") + "</div>"));
+	$("#char" + character.data.id).children("#skills").append($("<div class=charField id='history'>History: +" + (character.calculateStatModifier(character.data.stats.intelligence) + ((character.data.stats.bonusses.skills.history? character.getProficiencyBonus() : 0) * (character.data.stats.bonusses.expertise.history? 2 : 1))) + (character.data.stats.bonusses.skills.history? " (P)" : "") + (character.data.stats.bonusses.expertise.history? " (E)" : "") + "</div>"));
+	$("#char" + character.data.id).children("#skills").append($("<div class=charField id='insight'>Insight: +" + (character.calculateStatModifier(character.data.stats.wisdom) + ((character.data.stats.bonusses.skills.insight? character.getProficiencyBonus() : 0) * (character.data.stats.bonusses.expertise.insight? 2 : 1))) + (character.data.stats.bonusses.skills.insight? " (P)" : "") + (character.data.stats.bonusses.expertise.insight? " (E)" : "") + "</div>"));
+	$("#char" + character.data.id).children("#skills").append($("<div class=charField id='intimidation'>Intimidation: +" + (character.calculateStatModifier(character.data.stats.charisma) + ((character.data.stats.bonusses.skills.intimidation? character.getProficiencyBonus() : 0) * (character.data.stats.bonusses.expertise.intimidation? 2 : 1))) + (character.data.stats.bonusses.skills.intimidation? " (P)" : "") + (character.data.stats.bonusses.expertise.intimidation? " (E)" : "") + "</div>"));
+	$("#char" + character.data.id).children("#skills").append($("<div class=charField id='investigation'>Investigation: +" + (character.calculateStatModifier(character.data.stats.intelligence) + ((character.data.stats.bonusses.skills.investigation? character.getProficiencyBonus() : 0) * (character.data.stats.bonusses.expertise.investigation? 2 : 1))) + (character.data.stats.bonusses.skills.investigation? " (P)" : "") + (character.data.stats.bonusses.expertise.investigation? " (E)" : "") + "</div>"));
+	$("#char" + character.data.id).children("#skills").append($("<div class=charField id='medicine'>Medicine: +" + (character.calculateStatModifier(character.data.stats.wisdom) + ((character.data.stats.bonusses.skills.medicine? character.getProficiencyBonus() : 0) * (character.data.stats.bonusses.expertise.medicine? 2 : 1))) + (character.data.stats.bonusses.skills.medicine? " (P)" : "") + (character.data.stats.bonusses.expertise.medicine? " (E)" : "") + "</div>"));
+	$("#char" + character.data.id).children("#skills").append($("<div class=charField id='nature'>Nature: +" + (character.calculateStatModifier(character.data.stats.intelligence) + ((character.data.stats.bonusses.skills.nature? character.getProficiencyBonus() : 0) * (character.data.stats.bonusses.expertise.nature? 2 : 1))) + (character.data.stats.bonusses.skills.nature? " (P)" : "") + (character.data.stats.bonusses.expertise.nature? " (E)" : "") + "</div>"));
+	$("#char" + character.data.id).children("#skills").append($("<div class=charField id='perception'>Perception: +" + (character.calculateStatModifier(character.data.stats.wisdom) + ((character.data.stats.bonusses.skills.perception? character.getProficiencyBonus() : 0) * (character.data.stats.bonusses.expertise.perception? 2 : 1))) + (character.data.stats.bonusses.skills.perception? " (P)" : "") + (character.data.stats.bonusses.expertise.perception? " (E)" : "") + "</div>"));
+	$("#char" + character.data.id).children("#skills").append($("<div class=charField id='performance'>Performance: +" + (character.calculateStatModifier(character.data.stats.charisma) + ((character.data.stats.bonusses.skills.performance? character.getProficiencyBonus() : 0) * (character.data.stats.bonusses.expertise.performance? 2 : 1))) + (character.data.stats.bonusses.skills.performance? " (P)" : "") + (character.data.stats.bonusses.expertise.performance? " (E)" : "") + "</div>"));
+	$("#char" + character.data.id).children("#skills").append($("<div class=charField id='persuasion'>Persuasion: +" + (character.calculateStatModifier(character.data.stats.charisma) + ((character.data.stats.bonusses.skills.persuasion? character.getProficiencyBonus() : 0) * (character.data.stats.bonusses.expertise.persuasion? 2 : 1))) + (character.data.stats.bonusses.skills.persuasion? " (P)" : "") + (character.data.stats.bonusses.expertise.persuasion? " (E)" : "") + "</div>"));
+	$("#char" + character.data.id).children("#skills").append($("<div class=charField id='religion'>Religion: +" + (character.calculateStatModifier(character.data.stats.intelligence) + ((character.data.stats.bonusses.skills.religion? character.getProficiencyBonus() : 0) * (character.data.stats.bonusses.expertise.religion? 2 : 1))) + (character.data.stats.bonusses.skills.religion? " (P)" : "") + (character.data.stats.bonusses.expertise.religion? " (E)" : "") + "</div>"));
+	$("#char" + character.data.id).children("#skills").append($("<div class=charField id='athletics'>Athletics: +" + (character.calculateStatModifier(character.data.stats.strength) + ((character.data.stats.bonusses.skills.athletics? character.getProficiencyBonus() : 0) * (character.data.stats.bonusses.expertise.athletics? 2 : 1))) + (character.data.stats.bonusses.skills.athletics? " (P)" : "") + (character.data.stats.bonusses.expertise.athletics? " (E)" : "") + "</div>"));
+	$("#char" + character.data.id).children("#skills").append($("<div class=charField id='sleighOfHand'>Sleigh of Hand: +" + (character.calculateStatModifier(character.data.stats.dexterity) + ((character.data.stats.bonusses.skills.sleighOfHand? character.getProficiencyBonus() : 0) * (character.data.stats.bonusses.expertise.sleighOfHand? 2 : 1))) + (character.data.stats.bonusses.skills.sleighOfHand? " (P)" : "") + (character.data.stats.bonusses.expertise.sleighOfHand? " (E)" : "") + "</div>"));
+	$("#char" + character.data.id).children("#skills").append($("<div class=charField id='stealth'>Stealth: +" + (character.calculateStatModifier(character.data.stats.dexterity) + ((character.data.stats.bonusses.skills.stealth? character.getProficiencyBonus() : 0) * (character.data.stats.bonusses.expertise.stealth? 2 : 1))) + (character.data.stats.bonusses.skills.stealth? " (P)" : "") + (character.data.stats.bonusses.expertise.stealth? " (E)" : "") + "</div>"));
+	$("#char" + character.data.id).children("#skills").append($("<div class=charField id='survival'>Survival: +" + (character.calculateStatModifier(character.data.stats.wisdom) + ((character.data.stats.bonusses.skills.survival? character.getProficiencyBonus() : 0) * (character.data.stats.bonusses.expertise.survival? 2 : 1))) + (character.data.stats.bonusses.skills.survival? " (P)" : "") + (character.data.stats.bonusses.expertise.survival? " (E)" : "") + "</div>"));
+	$("#char" + character.data.id).children("#skills").append($("<div class=charField id='passiveWisdom'>Passive Wisdom (Perception): " + character.data.stats.bonusses.passiveWisdom + "</div>"));
+	
+	$("#char" + character.data.id).append($("<div class=charCategory id='status'>Status:<br></div>"));
+	$("#char" + character.data.id).children("#status").append($("<div class=charField id='armorClass'>Armor Class: WIP</div>"));
+	$("#char" + character.data.id).children("#status").append($("<div class=charField id='initiative'>Initiative: +" + character.data.stats.initiative + "</div>"));
+	$("#char" + character.data.id).children("#status").append($("<div class=charField id='speed'>Speed: " + character.data.stats.speed + "</div>"));
+	$("#char" + character.data.id).children("#status").append($("<div class=charField id='maxHitPoints'>Max Hit Points: " + character.data.status.maxHitPoints + "</div>"));
+	$("#char" + character.data.id).children("#status").append($("<div class=charField id='hitPoints'>Hit Points: " + character.data.status.currentHealth + "</div>"));
+	$("#char" + character.data.id).children("#status").append($("<div class=charField id='hitDice'>Hit Dice: " + character.data.hitDice + "</div>"));
+	
+	$("#char" + character.data.id).append("<br>");
 	character.openInventory();
 	$("#char" + charData.id).append(character.tempInventory.toHTML());
 	
@@ -174,12 +227,12 @@ function populateCharacterDiv(charData)
 	$("#newItemFor" + charData.id).append($("<input type='text' placeholder='Description and Effects' id='description'/>"));
 	$("#newItemFor" + charData.id).append("<br>Is a container?: ");
 	$("#newItemFor" + charData.id).append($("<input type='checkbox' id='container'/>"));
-	//character.saveInServer(); //TODO: REMOVE THIS WHEN NO LONGER NEEDED
+	
 	console.log("ending chartest");
 	
 	if(charData.assignedGame == -1)
 	{
-		$("#char" + charData.id + "info").append(" - Available");
+		$("#char" + charId).children("#quest").append("Available");
 	}
 	else
 	{
@@ -191,7 +244,7 @@ function populateCharacterDiv(charData)
 			url: "scripts/php/getgamebyid.php?id=" + charData.assignedGameId,
 			success: function(data)
 			{
-				$("#char" + charId + "info").append(" - On Quest: " + data.name);
+				$("#char" + charId).children("#quest").append("On Quest: " + data.name);
 				console.log(charId + ", " + data.name);
 			}
 		});
@@ -245,6 +298,11 @@ function Character(json)
 		});
 		
 		//console.log(thisAsJson);
+	}
+	
+	this.getProficiencyBonus = function()
+	{
+		return 1 + this.data.info.level;
 	}
 	
 	this.calculateStatModifier = function(statValue)
@@ -370,7 +428,7 @@ function InventoryObject(ownerId, name, description, quantity, weight, canContai
 	this.toHTML = function()
 	{
 		var baseElement = $("<div class='inventoryItem'></div>");
-		$(baseElement).append($("<div class='inventoryItemField' id='name'>" + this.name + " x" + this.quantity + "</div>"));
+		$(baseElement).append($("<div class='inventoryItemField inventoryItemNameLabel' id='name'>" + this.name + " x" + this.quantity + "</div>"));
 		
 		if(!this.isRoot)
 		{

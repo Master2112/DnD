@@ -124,6 +124,9 @@ class Character
 		
 		$this->spellcasting = new Collection();
 		$this->spellcasting->casterClass = $d[$this->next()];
+		
+		$this->info->class = $d[$this->next()];
+		$this->status->maxHitPoints = (int)$d[$this->next()];
 	}
 	
 	function next()
