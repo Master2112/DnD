@@ -1,7 +1,8 @@
 $(init);
 var mainContentBox;
 var user = null;
-var character = null;
+var characters = [];
+var allCharacterData = null;
 
 function init()
 {
@@ -126,51 +127,83 @@ function goToMainPage()
 			url: "scripts/php/getcharactersfromuser.php?id=" + user.id,
 			success: function(data){addAllUserCharacters(data);}
 		});
-		
+}
+
+function saveAll()
+{
+	for(var i = 0; i < characters.length; i++)
+	{
+		characters[i].saveInServer();
+	}
 	
+	refreshAllUserCharacters();
+}	
+
+function populateCharacterDiv(charData)
+{
+	$("#characterlist").append("<div class='characterinfo' id='char" + charData.id + "'></div>");
+	var character = new Character(charData);
+	characters.push(character);
+	console.log(character);
+
+	$("#char" + charData.id).html("");
+	
+	$("#char" + charData.id).append("<div id='char" + charData.id + "info'></div>")
+	$("#char" + charData.id + "info").append(charData.info.name);
+	
+	console.log("starting chartest");
+	$("#char" + charData.id).append("<br>");
+	character.openInventory();
+	$("#char" + charData.id).append(character.tempInventory.toHTML());
+	
+	$("#char" + charData.id).children(".inventoryItem").attr("class", "inventoryItem inventory");
+	
+	//New Item
+	$("#char" + charData.id).append($("<div id='newItemFor" + charData.id + "'></div>"));
+	$("#newItemFor" + charData.id).append($("<input type='text' placeholder='Name' id='name'/>"));
+	$("#newItemFor" + charData.id).append($("<input type='number' placeholder='Quantity' id='quantity' value='1'/>"));
+	$("#newItemFor" + charData.id).append($("<input type='number' placeholder='Weight' id='weight'/>"));
+	$("#newItemFor" + charData.id).append($("<input type='text' placeholder='Description and Effects' id='description'/>"));
+	$("#newItemFor" + charData.id).append($("<input type='toggle' value='Is or has a container' id='container'/>"));
+	
+	character.saveInServer(); //TODO: REMOVE THIS WHEN NO LONGER NEEDED
+	console.log("ending chartest");
+	
+	if(charData.assignedGame == -1)
+	{
+		$("#char" + charData.id + "info").append(" - Available");
+	}
+	else
+	{
+		var charId = charData.id;
+		
+		$.ajax({
+			dataType: "json",
+			data: "",
+			url: "scripts/php/getgamebyid.php?id=" + charData.assignedGameId,
+			success: function(data)
+			{
+				$("#char" + charId + "info").append(" - On Quest: " + data.name);
+				console.log(charId + ", " + data.name);
+			}
+		});
+	}
+}
+
+function refreshAllUserCharacters()
+{
+	$("#characterlist").html("");
+	
+	for(var i = 0; i < allCharacterData.length; i++)
+	{
+		populateCharacterDiv(allCharacterData[i]);
+	}
 }
 
 function addAllUserCharacters(data)
 {
-	for(var i = 0; i < data.length; i++)
-	{
-		var character = new Character(data[i]);
-		console.log(character);
-	
-		$("#characterlist").append("<div class='characterinfo' id='char" + data[i].id + "'>");
-		$("#char" + charId).append("<div id=char" + charId + "info></div>")
-		$("#char" + charId + "info").append(data[i].info.name);
-		
-		console.log("starting chartest");
-		$("#char" + charId).append("<br>");
-		character.openInventory();
-		$("#char" + charId).append(character.tempInventory.toHTML());
-		
-		character.saveInServer();
-		console.log("ending chartest");
-		
-		$("#char" + charId).append("</div>");
-		
-		if(data[i].assignedGame == -1)
-		{
-			$("#char" + charId + "info").append(" - Available");
-		}
-		else
-		{
-			var charId = data[i].id;
-			
-			$.ajax({
-				dataType: "json",
-				data: "",
-				url: "scripts/php/getgamebyid.php?id=" + data[i].assignedGameId,
-				success: function(data)
-				{
-					$("#char" + charId + "info").append(" - On Quest: " + data.name);
-					console.log(charId + ", " + data.name);
-				}
-			});
-		}
-	}
+	allCharacterData = data;
+	refreshAllUserCharacters();
 }
 
 function Character(json)
@@ -180,7 +213,7 @@ function Character(json)
 	
 	this.saveInServer = function()
 	{
-		var thisAsJson = JSON.stringify(this);
+		/*var thisAsJson = JSON.stringify(this);
 		
 		var request = new XMLHttpRequestObject();
 		request.open("POST", "savecharacter.php", true);
@@ -188,7 +221,20 @@ function Character(json)
 
 		request.send(thisAsJson);
 		console.log("SAVING TO SERVER");
-		console.log(thisAsJson);
+		console.log(thisAsJson);*/
+		this.saveInventory();
+		var thisAsJson = JSON.stringify(this);
+		
+		$.ajax
+		({
+			type: 'POST',
+			url: 'scripts/php/savecharacter.php',
+			data: {json: thisAsJson},
+			dataType: 'json',
+			complete: function(data){console.log(data);}
+		});
+		
+		//console.log(thisAsJson);
 	}
 	
 	this.calculateStatModifier = function(statValue)
@@ -214,6 +260,15 @@ function Character(json)
 		}
 	}
 	
+	this.saveInventory = function()
+	{
+		console.log("Saving inv");
+		console.log(this.tempInventory);
+		
+		var invAsJson = JSON.stringify(this.tempInventory)
+		this.data.inventory = invAsJson;//btoa(invAsJson);
+	}
+	
 	this.openInventory = function()
 	{
 		console.log("Opening inventory of character: " + this.data.name);
@@ -221,72 +276,112 @@ function Character(json)
 		if(this.data.inventory == "")
 		{
 			console.log("No saved inventory exists, making one now.");
-			this.tempInventory = new InventoryObject("Inventory", "Everything you have with you!", 1, 0, true);
-			this.saveInventory();
-		}
-		else
-		{
-			console.log("Existing inventory found. Opening...");
-			this.tempInventory = atob(this.data.inventory);
+			this.tempInventory = new InventoryObject(this.data.id, "Inventory", "Everything you have with you!", 1, 0, true);
 			console.log(this.tempInventory);
-		}	
-	}
-	
-	this.addToInventory = function(newObject)
-	{
-		if(this.tempInventory == null)
-			this.openInventory();
+			this.saveInventory();
 			
-		tempInventory.push(newObject);
+		}
 		
-		this.saveInventory();
+		console.log("Existing inventory found. Opening...");
+		this.tempInventory = JSON.parse(this.data.inventory);//atob(this.data.inventory));
+		this.tempInventory = $.extend(true, new InventoryObject(), this.tempInventory);
+		
+		this.tempInventory.fixItemTypes();
+		
+		console.log(this.tempInventory);
 	}
 	
-	this.saveInventory = function()
-	{
-		this.data.inventory = btoa(this.tempInventory);
-		this.tempInventory = null;
-	}
+	this.openInventory();
 }
 
-function InventoryObject(name, description, quantity = 1, weight = 0, canContain = false, contents = null)
+function InventoryObject(ownerId, name, description, quantity, weight, canContain, contents)
 {
 	this.name = name;
 	this.description = description;
 	this.weight = weight;
 	this.canContain = canContain;
 	this.quantity = quantity;
+	this.ownerId = ownerId;
+	
+	this.fixItemTypes = function()
+	{
+		for(var i = 0; i < this.contents.length; i++)
+		{
+			this.contents[i] = $.extend(true, new InventoryObject(), this.contents[i]);
+		}
+		
+		for(var i = 0; i < this.contents.length; i++)
+		{
+			this.contents[i].fixItemTypes();
+		}
+	}
 	
 	this.toHTML = function()
 	{
 		var baseElement = $("<div class='inventoryItem'></div>");
-		$(baseElement).append($("<div class='inventoryItemField'>" + this.name + "</div>"));
-		$(baseElement).append($("<div class='inventoryItemField'>" + this.quantity + "</div>"));
-		$(baseElement).append($("<br>"));
-		$(baseElement).append($("<div class='inventoryItemField'>" + this.weight + "kg (total: " + this.getTotalWeight() + "kg)</div>"));
-		$(baseElement).append($("<br>"));
+		$(baseElement).append($("<div class='inventoryItemField'>" + this.name + " x" + this.quantity + "</div>"));
+		
+		if(this.weight > 0)
+		{
+			$(baseElement).append($("<div class='inventoryItemField'>" + this.weight + "kg (total: " + this.getTotalWeight() + "kg)</div>"));
+			$(baseElement).append($("<br>"));
+		}
+		
 		$(baseElement).append($("<div class='inventoryItemField'>" + this.description + "</div>"));
 		
 		if(this.canContain)
 		{
 			$(baseElement).append($("<br>"));
-			var container = $(baseElement).append($("<div class='inventoryItemContents'></div>"));
+			$(baseElement).append($("<div class='inventoryItemContents'></div>"));
 			
-			for(var i = 0; i < contents.length; i++)
+			var container = $(baseElement).children(".inventoryItemContents");
+			
+			if(this.contents == null)
+				this.contents = [];
+				
+			for(var i = 0; i < this.contents.length; i++)
 			{
-				$(container).append(contents[i].toHTML());
+				$(container).append(this.contents[i].toHTML());
 			}
+			
+			$(baseElement).append($("<input type='button' id='addBtn' charId='" + this.ownerId + "' value='Add new item here'/>"));
+			$(baseElement).find("#addBtn").on("click", {obj: this}, function(event)
+			{
+				console.log("attempting adding a new item");
+				console.log(event.data.obj);
+										
+				event.data.obj.addNewObject($(this).attr("charId"));
+			});
 		}
 		
 		return $(baseElement);
 	}
 	
+	this.addNewObject = function(charid)
+	{
+		var newItemElement = $("newItemFor" + this.ownerId);
+		var newObj = new InventoryObject(charid, "tempName", "tempDescr", 1, 2, true);
+										//$(newItemElement).find("#name").val(),
+										//$(newItemElement).find("#description").val(),
+										//$(newItemElement).find("#quantity").val(),
+										//$(newItemElement).find("#weight").val(),
+										//$(newItemElement).find("#container").val());
+			
+		this.addToInventory(newObj);
+	}
+	
 	this.addToInventory = function(newObject)
 	{	
-		if(canContain)
+		console.log(newObject);
+		
+		if(this.canContain)
 		{
-			contents.push(newObject);
+			console.log("Adding to inventory...");
+			this.contents.push(newObject);
+			saveAll();
 		}
+		else
+			console.log("This object cannot hold other objects");
 	}
 	
 	this.getTotalWeight = function()

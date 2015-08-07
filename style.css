@@ -7,21 +7,34 @@
 {
 	float: left;
 	width: 300px;
-	height: 300px;
+	max-height: 1000px;
 	background-color: silver;
-	padding: 5px;
-	margin: 10px;
+	padding-top: 5px;
+	margin-top: 10px;
+	border: 1px solid black;
+}
+
+.inventory
+{
+	float: left;
+	width: 90%;
+	height: 600px;
+	max-height: 600px;
 }
 
 .inventoryItemField
 {
 	background-color: gray;
+	margin: 3px;
+	overflow-y: scroll;
+	max-height: 100px;
 }
 
 .inventoryItemContents
 {
 	background-color: gray;
 	width: auto;
-	height: auto;
-	overflow: auto;
+	height: 50%;
+	overflow-y: scroll;
+	margin: 3px;
 }
