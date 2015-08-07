@@ -308,6 +308,17 @@ function Character(json)
 	this.openInventory();
 }
 
+function addslashes(string) {
+    return string.replace(/\\/g, '\\\\').
+        replace(/\u0008/g, '\\b').
+        replace(/\t/g, '\\t').
+        replace(/\n/g, '\\n').
+        replace(/\f/g, '\\f').
+        replace(/\r/g, '\\r').
+        replace(/'/g, '\\\'').
+        replace(/"/g, '\\"');
+}
+
 function InventoryObject(ownerId, name, description, quantity, weight, canContain, contents)
 {
 	this.isRoot = false;
@@ -363,7 +374,7 @@ function InventoryObject(ownerId, name, description, quantity, weight, canContai
 		
 		if(!this.isRoot)
 		{
-			$(baseElement).append($("<input type='text' class='inventoryItemField', id='nameEditable' value='" + this.name + "'/>"));
+			$(baseElement).append($('<input type="text" class="inventoryItemField", id="nameEditable" value="' + this.name.replace('"', "'") + '"/>'));
 			$(baseElement).children("#nameEditable").hide();
 			
 			$(baseElement).append($("<input type='button' id='editNameBtn' charId='" + this.ownerId + "' value='Edit Name'/>"));
@@ -431,7 +442,7 @@ function InventoryObject(ownerId, name, description, quantity, weight, canContai
 		
 		if(!this.isRoot)
 		{
-			$(baseElement).append($("<input type='text' class='inventoryItemField', id='descriptionEditable' value='" + this.description + "'/>"));
+			$(baseElement).append($('<input type="text" class="inventoryItemField", id="descriptionEditable" value="' + this.description.replace('"', "'") + '"/>'));
 			$(baseElement).children("#descriptionEditable").hide();
 			
 			$(baseElement).append($("<input type='button' id='editDescrBtn' charId='" + this.ownerId + "' value='Edit Description'/>"));
