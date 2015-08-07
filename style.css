@@ -26,6 +26,7 @@
 	margin: 3px;
 	/*overflow-y: scroll;*/
 	height: auto;
+	width: calc(100% - 6px);
 }
 
 .inventoryItemContents
