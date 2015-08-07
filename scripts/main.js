@@ -3,6 +3,7 @@ var mainContentBox;
 var user = null;
 var characters = [];
 var allCharacterData = null;
+var clipboard = null;
 
 function init()
 {
@@ -166,7 +167,7 @@ function populateCharacterDiv(charData)
 	$("#newItemFor" + charData.id).append($("<input type='text' placeholder='Description and Effects' id='description'/>"));
 	$("#newItemFor" + charData.id).append($("<input type='toggle' value='Is or has a container' id='container'/>"));
 	
-	character.saveInServer(); //TODO: REMOVE THIS WHEN NO LONGER NEEDED
+	//character.saveInServer(); //TODO: REMOVE THIS WHEN NO LONGER NEEDED
 	console.log("ending chartest");
 	
 	if(charData.assignedGame == -1)
@@ -193,6 +194,8 @@ function populateCharacterDiv(charData)
 function refreshAllUserCharacters()
 {
 	$("#characterlist").html("");
+	
+	characters = [];
 	
 	for(var i = 0; i < allCharacterData.length; i++)
 	{
@@ -263,6 +266,9 @@ function Character(json)
 	this.saveInventory = function()
 	{
 		console.log("Saving inv");
+		
+		this.tempInventory.removeDeleted();
+		
 		console.log(this.tempInventory);
 		
 		var invAsJson = JSON.stringify(this.tempInventory)
@@ -277,6 +283,7 @@ function Character(json)
 		{
 			console.log("No saved inventory exists, making one now.");
 			this.tempInventory = new InventoryObject(this.data.id, "Inventory", "Everything you have with you!", 1, 0, true);
+			tempInventory.isRoot = true;
 			console.log(this.tempInventory);
 			this.saveInventory();
 			
@@ -285,6 +292,7 @@ function Character(json)
 		console.log("Existing inventory found. Opening...");
 		this.tempInventory = JSON.parse(this.data.inventory);//atob(this.data.inventory));
 		this.tempInventory = $.extend(true, new InventoryObject(), this.tempInventory);
+		this.tempInventory.isRoot = true;
 		
 		this.tempInventory.fixItemTypes();
 		
@@ -296,12 +304,14 @@ function Character(json)
 
 function InventoryObject(ownerId, name, description, quantity, weight, canContain, contents)
 {
+	this.isRoot = false;
 	this.name = name;
 	this.description = description;
 	this.weight = weight;
 	this.canContain = canContain;
 	this.quantity = quantity;
 	this.ownerId = ownerId;
+	this.isDeleted = false;
 	
 	this.fixItemTypes = function()
 	{
@@ -313,6 +323,24 @@ function InventoryObject(ownerId, name, description, quantity, weight, canContai
 		for(var i = 0; i < this.contents.length; i++)
 		{
 			this.contents[i].fixItemTypes();
+		}
+	}
+	
+	this.removeDeleted = function()
+	{
+		var newContents = [];
+		
+		for(var i = 0; i < this.contents.length; i++)
+		{
+			if(!this.contents[i].isDeleted)
+				newContents.push(this.contents[i]);
+		}
+		
+		this.contents = newContents;
+		
+		for(var i = 0; i < this.contents.length; i++)
+		{
+			this.contents[i].removeDeleted();
 		}
 	}
 	
@@ -351,10 +379,72 @@ function InventoryObject(ownerId, name, description, quantity, weight, canContai
 				console.log(event.data.obj);
 										
 				event.data.obj.addNewObject($(this).attr("charId"));
+				
+				event.stopImmediatePropagation()
+				return false;
+			});
+			
+			$(baseElement).append($("<input type='button' id='pasteBtn' charId='" + this.ownerId + "' value='Paste item here'/>"));
+			$(baseElement).find("#pasteBtn").on("click", {obj: this}, function(event)
+			{
+				console.log("attempting pasting an item");
+				console.log(event.data.obj);
+				
+				if(clipboard != null)
+					event.data.obj.addToInventory(clipboard);
+				
+				event.stopImmediatePropagation()
+				return false;
+			});
+		}
+		
+		if(!this.isRoot)
+		{
+			$(baseElement).append($("<input type='button' id='removeBtn' charId='" + this.ownerId + "' value='Delete Item'/>"));
+			$(baseElement).find("#removeBtn").on("click", {obj: this}, function(event)
+			{
+				console.log("deleting an item");
+				console.log(event.data.obj);
+										
+				event.data.obj.remove();
+				
+				event.stopImmediatePropagation()
+				return false;
+			});
+			/*
+			$(baseElement).append($("<input type='button' id='cutBtn' charId='" + this.ownerId + "' value='Cut item'/>"));
+			$(baseElement).find("#cutBtn").on("click", {obj: this}, function(event)
+			{
+				console.log("attempting cutting an item");
+				console.log(event.data.obj);
+				
+				clipboard = event.data.obj;
+				event.data.obj.remove();
+				
+				event.stopImmediatePropagation()
+				return false;
+			});
+			*/
+			$(baseElement).append($("<input type='button' id='copyBtn' charId='" + this.ownerId + "' value='Copy item'/>"));
+			$(baseElement).find("#copyBtn").on("click", {obj: this}, function(event)
+			{
+				console.log("attempting copying an item");
+				console.log(event.data.obj);
+				
+				clipboard = event.data.obj;
+				
+				event.stopImmediatePropagation()
+				return false;
 			});
 		}
 		
 		return $(baseElement);
+	}
+	
+	this.remove = function()
+	{
+		this.isDeleted = true;
+		saveAll();
 	}
 	
 	this.addNewObject = function(charid)
