@@ -161,12 +161,19 @@ function populateCharacterDiv(charData)
 	
 	//New Item
 	$("#char" + charData.id).append($("<div id='newItemFor" + charData.id + "'></div>"));
-	$("#newItemFor" + charData.id).append($("<input type='text' placeholder='Name' id='name'/>"));
-	$("#newItemFor" + charData.id).append($("<input type='number' placeholder='Quantity' id='quantity' value='1'/>"));
-	$("#newItemFor" + charData.id).append($("<input type='number' placeholder='Weight' id='weight'/>"));
-	$("#newItemFor" + charData.id).append($("<input type='text' placeholder='Description and Effects' id='description'/>"));
-	$("#newItemFor" + charData.id).append($("<input type='toggle' value='Is or has a container' id='container'/>"));
 	
+	$("#newItemFor" + charData.id).append("<div>New Item Parameters<br>");
+	$("#newItemFor" + charData.id).append("Name: ");
+	$("#newItemFor" + charData.id).append($("<input type='text' placeholder='Name' id='name'/>"));
+	$("#newItemFor" + charData.id).append("<br>Quantity: ");
+	$("#newItemFor" + charData.id).append($("<input type='number' placeholder='Quantity' id='quantity' value='1'/>"));
+	$("#newItemFor" + charData.id).append("<br>Weight: ");
+	$("#newItemFor" + charData.id).append($("<input type='number' placeholder='Weight' id='weight' value='0'/>"));
+	$("#newItemFor" + charData.id).append("<br>Description: ");
+	$("#newItemFor" + charData.id).append($("<input type='text' placeholder='Description and Effects' id='description'/>"));
+	$("#newItemFor" + charData.id).append("<br>Is a container?: ");
+	$("#newItemFor" + charData.id).append($("<input type='checkbox' id='container'/>"));
+	$("#newItemFor" + charData.id).append("</div>");
 	//character.saveInServer(); //TODO: REMOVE THIS WHEN NO LONGER NEEDED
 	console.log("ending chartest");
 	
@@ -315,32 +322,38 @@ function InventoryObject(ownerId, name, description, quantity, weight, canContai
 	
 	this.fixItemTypes = function()
 	{
-		for(var i = 0; i < this.contents.length; i++)
+		if(this.contents != null)
 		{
-			this.contents[i] = $.extend(true, new InventoryObject(), this.contents[i]);
-		}
-		
-		for(var i = 0; i < this.contents.length; i++)
-		{
-			this.contents[i].fixItemTypes();
+			for(var i = 0; i < this.contents.length; i++)
+			{
+				this.contents[i] = $.extend(true, new InventoryObject(), this.contents[i]);
+			}
+			
+			for(var i = 0; i < this.contents.length; i++)
+			{
+				this.contents[i].fixItemTypes();
+			}
 		}
 	}
 	
 	this.removeDeleted = function()
 	{
-		var newContents = [];
-		
-		for(var i = 0; i < this.contents.length; i++)
+		if(this.contents != null)
 		{
-			if(!this.contents[i].isDeleted)
-				newContents.push(this.contents[i]);
-		}
-		
-		this.contents = newContents;
-		
-		for(var i = 0; i < this.contents.length; i++)
-		{
-			this.contents[i].removeDeleted();
+			var newContents = [];
+			
+			for(var i = 0; i < this.contents.length; i++)
+			{
+				if(!this.contents[i].isDeleted && this.contents[i].quantity > 0)
+					newContents.push(this.contents[i]);
+			}
+			
+			this.contents = newContents;
+			
+			for(var i = 0; i < this.contents.length; i++)
+			{
+				this.contents[i].removeDeleted();
+			}
 		}
 	}
 	
@@ -449,14 +462,20 @@ function InventoryObject(ownerId, name, description, quantity, weight, canContai
 	
 	this.addNewObject = function(charid)
 	{
-		var newItemElement = $("newItemFor" + this.ownerId);
-		var newObj = new InventoryObject(charid, "tempName", "tempDescr", 1, 2, true);
-										//$(newItemElement).find("#name").val(),
-										//$(newItemElement).find("#description").val(),
-										//$(newItemElement).find("#quantity").val(),
-										//$(newItemElement).find("#weight").val(),
-										//$(newItemElement).find("#container").val());
-			
+		var newItemElement = $("#newItemFor" + this.ownerId);
+		var newObj = new InventoryObject(charid, //"tempName", "tempDescr", 1, 2, true);
+										$(newItemElement).find("#name").val(),
+										$(newItemElement).find("#description").val(),
+										$(newItemElement).find("#quantity").val(),
+										$(newItemElement).find("#weight").val(),
+										$(newItemElement).find("#container")[0].checked);
+		
+		if(newobj.canContain)
+			newobj.quantity = 1;
+		
+		console.log("Toggle value:");
+		console.log($(newItemElement).find("#container")[0].checked);
+		
 		this.addToInventory(newObj);
 	}
 	
