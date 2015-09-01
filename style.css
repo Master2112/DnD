@@ -3,14 +3,30 @@
 	float: left;
 }
 
+.charLabel
+{
+	background-color: #5555FF;
+	font-weight: bold;
+	font-size: 20px;
+	overflow: auto;
+}
+
+.characterInfo
+{
+	border: 1px solid black;
+	background-color: grey;
+	margin-bottom: 30px;
+	overflow: auto;
+}
+
 .charCategory
 {
 	margin: 5px;
 	padding: 5px;
-	float: left;
 	border: 1px solid black;
 	font-size: 20px;
 	background-color: silver;
+	overflow: auto;
 }
 
 .charField
@@ -19,7 +35,8 @@
 	padding: 3px;
 	border: 1px solid black;
 	font-size: 12px;
-	background-color: gray;
+	background-color: silver;
+	overflow: auto;
 }
 
 .inventoryItem
@@ -30,20 +47,22 @@
 	padding-top: 5px;
 	margin: 5px;
 	border: 1px solid black;
+	overflow: auto;
 }
 
 .inventory
 {
 	float: left;
-	width: 90%;
+	width: 99%;
 	height: auto;
+	overflow: auto;
 }
 
 .inventoryItemField
 {
 	background-color: gray;
 	margin: 3px;
-	/*overflow-y: scroll;*/
+	overflow: auto;
 	height: auto;
 	width: calc(100% - 6px);
 }
@@ -52,6 +71,7 @@
 {
 	background-color: #9999FF;
 	font-weight: bold;
+	overflow: auto;
 }
 
 .inventoryItemContents

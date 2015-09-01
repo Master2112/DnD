@@ -195,6 +195,28 @@
 		return $success;
 	}
 	
+	function NewCharacter($ownerId)
+	{
+		$link  = Connect();
+	
+		$sql = "INSERT INTO `characters` (name, ownerid) VALUES ('New Character', '$ownerId')";
+
+		mysqli_query($link, $sql);
+			
+		Disconnect($link);
+	}
+	
+	function DeleteCharacter($id)
+	{
+		$link  = Connect();
+	
+		$sql = "DELETE FROM `characters` WHERE `id` = $id";
+
+		mysqli_query($link, $sql);
+			
+		Disconnect($link);
+	}
+	
 	function GetAllUsers()
 	{
 		$link = Connect();
