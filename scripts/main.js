@@ -627,7 +627,7 @@ function InventoryObject(ownerId, name, description, quantity, weight, canContai
 				return false;
 			});
 			
-			$(baseElement).append($("<input type='button' id='pasteBtn' charId='" + this.ownerId + "' value='Paste item here' style='display:none;'/>"));
+			$(baseElement).append($("<input type='button' id='pasteBtn' charId='" + this.ownerId + "' value='Paste item here'/>"));
 			$(baseElement).find("#pasteBtn").on("click", {obj: this}, function(event)
 			{
 				console.log("attempting pasting an item");
@@ -635,8 +635,6 @@ function InventoryObject(ownerId, name, description, quantity, weight, canContai
 				
 				if(clipboard != null)
 					event.data.obj.addToInventory(clipboard);
-				
-				$('#pasteBtn').hide();
 				
 				event.stopImmediatePropagation()
 				return false;
@@ -677,8 +675,6 @@ function InventoryObject(ownerId, name, description, quantity, weight, canContai
 				console.log(event.data.obj);
 				
 				clipboard = event.data.obj;
-				
-				$('#pasteBtn').show();
 				
 				event.stopImmediatePropagation()
 				return false;
