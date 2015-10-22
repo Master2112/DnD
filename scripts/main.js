@@ -152,6 +152,42 @@ function populateCharacterDiv(charData)
 	$("#char" + character.data.id).append($("<input type='button' value='Refresh' id='refreshMainPage'/>"));
 	$("#refreshMainPage").on("click", goToMainPage);
 	
+	$("#char" + character.data.id).append($("<input type='button' id='delete1' charId='" + charData.ownerId + "' value='Delete " + charData.info.name + "'/>"));
+	$("#char" + character.data.id).find("#delete1").on("click", {obj: character}, function(event)
+	{
+		$("#char" + character.data.id).find("#delete2").slideDown();
+		
+		event.stopImmediatePropagation()
+		return false;
+	}); //end edit
+	
+	$("#char" + character.data.id).append($("<input type='button' id='delete2' charId='" + charData.ownerId + "' value='Are you sure?' style='display: none;'/>"));
+	$("#char" + character.data.id).find("#delete2").on("click", {obj: character}, function(event)
+	{
+		$("#char" + character.data.id).find("#delete3").slideDown();
+		
+		event.stopImmediatePropagation()
+		return false;
+	}); //end edit
+	
+	$("#char" + character.data.id).append($("<input type='button' id='delete3' charId='" + charData.ownerId + "' value='Really sure?' style='display: none;'/>"));
+	$("#char" + character.data.id).find("#delete3").on("click", {obj: character}, function(event)
+	{
+		$("#char" + character.data.id).find("#delete4").slideDown();
+		
+		event.stopImmediatePropagation()
+		return false;
+	}); //end edit
+	
+	$("#char" + character.data.id).append($("<input type='button' id='delete4' charId='" + charData.ownerId + "' value='PERMANENTLY DELETE' style='display: none;'/>"));
+	$("#char" + character.data.id).find("#delete4").on("click", {obj: character}, function(event)
+	{
+		$.ajax({url: "scripts/php/deletecharacter.php?id=" + charData.id, success:function(){goToMainPage();}});
+		
+		event.stopImmediatePropagation()
+		return false;
+	}); //end edit
+	
 	$("#char" + character.data.id).append($('<div id="basicInfo"></div>'));
 	
 	//begin edit
@@ -268,9 +304,12 @@ function populateCharacterDiv(charData)
 	
 	$("#char" + charData.id).children(".inventoryItem").attr("class", "inventoryItem inventory");
 	
+	character.openSpells();
+	$("#char" + charData.id).append(character.tempSpells.toHTML());
+	
 	//New Item
-	$("#char" + charData.id).append("<br>");
-	$("#char" + charData.id).append($("<div class='inventoryItem' id='newItemFor" + charData.id + "'></div>"));
+	$("#char" + charData.id).children(".inventoryItem").append("<br>");
+	$("#char" + charData.id).children(".inventoryItem").append($("<div class='inventoryItem newItem' id='newItemFor" + charData.id + "'></div>"));
 	
 	$("#newItemFor" + charData.id).append("<br>New Item Parameters<br>");
 	$("#newItemFor" + charData.id).append("Name: ");
@@ -285,42 +324,6 @@ function populateCharacterDiv(charData)
 	$("#newItemFor" + charData.id).append($("<input type='checkbox' id='container'/>"));
 	
 	console.log("ending chartest");
-	
-	$("#char" + character.data.id).append($("<input type='button' id='delete1' charId='" + charData.ownerId + "' value='Delete " + charData.info.name + "'/><br>"));
-	$("#char" + character.data.id).find("#delete1").on("click", {obj: character}, function(event)
-	{
-		$("#char" + character.data.id).find("#delete2").slideDown();
-		
-		event.stopImmediatePropagation()
-		return false;
-	}); //end edit
-	
-	$("#char" + character.data.id).append($("<input type='button' id='delete2' charId='" + charData.ownerId + "' value='Are you sure?' style='display: none;'/><br>"));
-	$("#char" + character.data.id).find("#delete2").on("click", {obj: character}, function(event)
-	{
-		$("#char" + character.data.id).find("#delete3").slideDown();
-		
-		event.stopImmediatePropagation()
-		return false;
-	}); //end edit
-	
-	$("#char" + character.data.id).append($("<input type='button' id='delete3' charId='" + charData.ownerId + "' value='Really sure?' style='display: none;'/><br>"));
-	$("#char" + character.data.id).find("#delete3").on("click", {obj: character}, function(event)
-	{
-		$("#char" + character.data.id).find("#delete4").slideDown();
-		
-		event.stopImmediatePropagation()
-		return false;
-	}); //end edit
-	
-	$("#char" + character.data.id).append($("<input type='button' id='delete4' charId='" + charData.ownerId + "' value='PERMANENTLY DELETE' style='display: none;'/><br>"));
-	$("#char" + character.data.id).find("#delete4").on("click", {obj: character}, function(event)
-	{
-		$.ajax({url: "scripts/php/deletecharacter.php?id=" + charData.id, success:function(){goToMainPage();}});
-		
-		event.stopImmediatePropagation()
-		return false;
-	}); //end edit
 }
 
 function refreshAllUserCharacters()
@@ -353,6 +356,7 @@ function Character(json)
 {
 	this.data = json;
 	this.tempInventory = null;
+	this.tempSpells = null;
 	
 	this.saveInServer = function()
 	{
@@ -366,6 +370,7 @@ function Character(json)
 		console.log("SAVING TO SERVER");
 		console.log(thisAsJson);*/
 		this.saveInventory();
+		this.saveSpells();
 		var thisAsJson = JSON.stringify(this);
 		
 		$.ajax
@@ -409,10 +414,18 @@ function Character(json)
 		
 		this.tempInventory.removeDeleted();
 		
-		console.log(this.tempInventory);
-		
 		var invAsJson = JSON.stringify(this.tempInventory)
 		this.data.inventory = invAsJson;//btoa(invAsJson);
+	}
+	
+	this.saveSpells = function()
+	{
+		console.log("Saving spells");
+		
+		//this.tempInventory.removeDeleted();
+		
+		var spellsAsJson = JSON.stringify(this.tempSpells)
+		this.data.spells = spellsAsJson;//btoa(invAsJson);
 	}
 	
 	this.openInventory = function()
@@ -438,7 +451,515 @@ function Character(json)
 		console.log(this.tempInventory);
 	}
 	
+	this.openSpells = function()
+	{
+		console.log("Opening spellbook of character: " + this.data.name);
+		
+		if(this.data.spells == "")
+		{
+			console.log("No saved spellbook exists, making one now.");
+			this.tempSpells = new SpellBookObject(this.data.id);
+			this.saveSpells();
+		}
+		
+		console.log("Existing inventory found. Opening...");
+		this.tempSpells = JSON.parse(this.data.spells);//atob(this.data.inventory));
+		this.tempSpells = $.extend(true, new SpellBookObject(), this.tempSpells);
+		
+		this.tempSpells.fixSpellTypes();
+		
+		console.log(this.tempSpells);
+	}
+	
 	this.openInventory();
+	this.openSpells();
+}
+
+function SpellBookObject(ownerId, contents)
+{
+	this.ownerId = ownerId;
+	
+	this.sorceryPoints = 0;
+	this.lvl1slots = 0;
+	this.lvl2slots = 0;
+	this.lvl3slots = 0;
+	this.lvl4slots = 0;
+	this.lvl5slots = 0;
+	this.lvl6slots = 0;
+	this.lvl7slots = 0;
+	this.lvl8slots = 0;
+	this.lvl9slots = 0;
+	
+	this.fixSpellTypes = function()
+	{
+		if(this.contents != null)
+		{
+			for(var i = 0; i < this.contents.length; i++)
+			{
+				this.contents[i] = $.extend(true, new SpellObject(), this.contents[i]);
+			}
+		}
+	}
+	
+	this.toHTML = function()
+	{
+		var baseElement = $('<div id="spellBook"></div>');
+		
+		$(baseElement).append('<div id="sorcPoints">Sorcery Points: ' + this.sorceryPoints + '</div>');
+		$(baseElement).children("#sorcPoints").append('<input type="button" id="addSlot" value="+"/>');
+		$(baseElement).children("#sorcPoints").find("#addSlot").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			event.data.obj.sorceryPoints++;
+			saveAll();
+			event.stopImmediatePropagation()
+			return false;
+		});
+		$(baseElement).children("#sorcPoints").append('<input type="button" id="remSlot" value="-"/>');
+		$(baseElement).children("#sorcPoints").find("#remSlot").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			event.data.obj.sorceryPoints--;
+			saveAll();
+			event.stopImmediatePropagation()
+			return false;
+		});
+		
+		if(this.contents == null)
+			this.contents = [];
+		
+		$(baseElement).append('<div id="lvl0"><div class="inventoryItemNameLabel">Cantrips</div></div>');
+		$(baseElement).children("#lvl0").append('<div id="spellContainer"></div>');
+		for(var i = 0; i < this.contents.length; i++)
+		{
+			if(this.contents[i].level == 0)
+				$(baseElement).children("#lvl0").children("#spellContainer").append(this.contents[i].toHTML());
+		}
+		$(baseElement).children("#lvl0").append($("<input type='button' id='addSpell' charId='" + this.ownerId + "' value='New Spell'/>"));
+		$(baseElement).children("#lvl0").append("<br>");
+		$(baseElement).children("#lvl0").find("#addSpell").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			var spell = new SpellObject();
+			spell.level = 0;
+			event.data.obj.contents.push(spell);
+			saveAll();
+			event.stopImmediatePropagation()
+			return false;
+		});
+		
+		$(baseElement).append('<div id="lvl1"><div class="inventoryItemNameLabel">Level 1 Slots: ' + this.lvl1slots + '</div></div>');
+		$(baseElement).children("#lvl1").append('<input type="button" id="addSlot" value="+"/>');
+		$(baseElement).children("#lvl1").find("#addSlot").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			event.data.obj.lvl1slots++;
+			saveAll();
+			event.stopImmediatePropagation()
+			return false;
+		});
+		$(baseElement).children("#lvl1").append('<input type="button" id="remSlot" value="-"/>');
+		$(baseElement).children("#lvl1").find("#remSlot").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			event.data.obj.lvl1slots--;
+			saveAll();
+			event.stopImmediatePropagation()
+			return false;
+		});
+		$(baseElement).children("#lvl1").append('<div id="spellContainer"></div>');
+		for(var i = 0; i < this.contents.length; i++)
+		{
+			if(this.contents[i].level == 1)
+				$(baseElement).children("#lvl1").children("#spellContainer").append(this.contents[i].toHTML());
+		}
+		$(baseElement).children("#lvl1").append($("<input type='button' id='addSpell' charId='" + this.ownerId + "' value='New Spell'/>"));
+		$(baseElement).children("#lvl1").append("<br>");
+		$(baseElement).children("#lvl1").find("#addSpell").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			var spell = new SpellObject();
+			spell.level = 1;
+			event.data.obj.contents.push(spell);
+			saveAll();
+			event.stopImmediatePropagation()
+			return false;
+		});
+		
+		$(baseElement).append('<div id="lvl2"><div class="inventoryItemNameLabel">Level 2 Slots: ' + this.lvl2slots + '</div></div>');
+		$(baseElement).children("#lvl2").append('<input type="button" id="addSlot" value="+"/>');
+		$(baseElement).children("#lvl2").find("#addSlot").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			event.data.obj.lvl2slots++;
+			saveAll();
+			event.stopImmediatePropagation()
+			return false;
+		});
+		$(baseElement).children("#lvl2").append('<input type="button" id="remSlot" value="-"/>');
+		$(baseElement).children("#lvl2").find("#remSlot").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			event.data.obj.lvl2slots--;
+			saveAll();
+			event.stopImmediatePropagation()
+			return false;
+		});
+		$(baseElement).children("#lvl2").append('<div id="spellContainer"></div>');
+		for(var i = 0; i < this.contents.length; i++)
+		{
+			if(this.contents[i].level == 2)
+				$(baseElement).children("#lvl2").children("#spellContainer").append(this.contents[i].toHTML());
+		}
+		$(baseElement).children("#lvl2").append($("<input type='button' id='addSpell' charId='" + this.ownerId + "' value='New Spell'/>"));
+		$(baseElement).children("#lvl2").append("<br>");
+		$(baseElement).children("#lvl2").find("#addSpell").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			var spell = new SpellObject();
+			spell.level = 2;
+			event.data.obj.contents.push(spell);
+			saveAll();
+			event.stopImmediatePropagation()
+			return false;
+		});
+		
+		$(baseElement).append('<div id="lvl3"><div class="inventoryItemNameLabel">Level 3 Slots: ' + this.lvl3slots + '</div></div>');
+		$(baseElement).children("#lvl3").append('<input type="button" id="addSlot" value="+"/>');
+		$(baseElement).children("#lvl3").find("#addSlot").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			event.data.obj.lvl3slots++;
+			saveAll();
+			event.stopImmediatePropagation()
+			return false;
+		});
+		$(baseElement).children("#lvl3").append('<input type="button" id="remSlot" value="-"/>');
+		$(baseElement).children("#lvl3").find("#remSlot").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			event.data.obj.lvl3slots--;
+			saveAll();
+			event.stopImmediatePropagation()
+			return false;
+		});
+		$(baseElement).children("#lvl3").append('<div id="spellContainer"></div>');
+		for(var i = 0; i < this.contents.length; i++)
+		{
+			if(this.contents[i].level == 3)
+				$(baseElement).children("#lvl3").children("#spellContainer").append(this.contents[i].toHTML());
+		}
+		$(baseElement).children("#lvl3").append($("<input type='button' id='addSpell' charId='" + this.ownerId + "' value='New Spell'/>"));
+		$(baseElement).children("#lvl3").append("<br>");
+		$(baseElement).children("#lvl3").find("#addSpell").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			var spell = new SpellObject();
+			spell.level = 3;
+			event.data.obj.contents.push(spell);
+			saveAll();
+			event.stopImmediatePropagation()
+			return false;
+		});
+		
+		$(baseElement).append('<div id="lvl4"><div class="inventoryItemNameLabel">Level 4 Slots: ' + this.lvl4slots + '</div></div>');
+		$(baseElement).children("#lvl4").append('<input type="button" id="addSlot" value="+"/>');
+		$(baseElement).children("#lvl4").find("#addSlot").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			event.data.obj.lvl4slots++;
+			saveAll();
+			event.stopImmediatePropagation()
+			return false;
+		});
+		$(baseElement).children("#lvl4").append('<input type="button" id="remSlot" value="-"/>');
+		$(baseElement).children("#lvl4").find("#remSlot").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			event.data.obj.lvl4slots--;
+			saveAll();
+			event.stopImmediatePropagation()
+			return false;
+		});
+		$(baseElement).children("#lvl4").append('<div id="spellContainer"></div>');
+		for(var i = 0; i < this.contents.length; i++)
+		{
+			if(this.contents[i].level == 4)
+				$(baseElement).children("#lvl4").children("#spellContainer").append(this.contents[i].toHTML());
+		}
+		$(baseElement).children("#lvl4").append($("<input type='button' id='addSpell' charId='" + this.ownerId + "' value='New Spell'/>"));
+		$(baseElement).children("#lvl4").append("<br>");
+		$(baseElement).children("#lvl4").find("#addSpell").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			var spell = new SpellObject();
+			spell.level = 4;
+			event.data.obj.contents.push(spell);
+			saveAll();
+			event.stopImmediatePropagation()
+			return false;
+		});
+		
+		$(baseElement).append('<div id="lvl5"><div class="inventoryItemNameLabel">Level 5 Slots: ' + this.lvl5slots + '<div></div>');
+		$(baseElement).children("#lvl5").append('<input type="button" id="addSlot" value="+"/>');
+		$(baseElement).children("#lvl5").find("#addSlot").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			event.data.obj.lvl5slots++;
+			saveAll();
+			event.stopImmediatePropagation()
+			return false;
+		});
+		$(baseElement).children("#lvl5").append('<input type="button" id="remSlot" value="-"/>');
+		$(baseElement).children("#lvl5").find("#remSlot").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			event.data.obj.lvl5slots--;
+			saveAll();
+			event.stopImmediatePropagation()
+			return false;
+		});
+		$(baseElement).children("#lvl5").append('<div id="spellContainer"></div>');
+		for(var i = 0; i < this.contents.length; i++)
+		{
+			if(this.contents[i].level == 5)
+				$(baseElement).children("#lvl5").children("#spellContainer").append(this.contents[i].toHTML());
+		}
+		$(baseElement).children("#lvl5").append($("<input type='button' id='addSpell' charId='" + this.ownerId + "' value='New Spell'/>"));
+		$(baseElement).children("#lvl5").append("<br>");
+		$(baseElement).children("#lvl5").find("#addSpell").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			var spell = new SpellObject();
+			spell.level = 5;
+			event.data.obj.contents.push(spell);
+			saveAll();
+			event.stopImmediatePropagation()
+			return false;
+		});
+		
+		$(baseElement).append('<div id="lvl6"><div class="inventoryItemNameLabel">Level 6 Slots: ' + this.lvl6slots + '</div></div>');
+		$(baseElement).children("#lvl6").append('<input type="button" id="addSlot" value="+"/>');
+		$(baseElement).children("#lvl6").find("#addSlot").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			event.data.obj.lvl6slots++;
+			saveAll();
+			event.stopImmediatePropagation()
+			return false;
+		});
+		$(baseElement).children("#lvl6").append('<input type="button" id="remSlot" value="-"/>');
+		$(baseElement).children("#lvl6").find("#remSlot").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			event.data.obj.lvl6slots--;
+			saveAll();
+			event.stopImmediatePropagation()
+			return false;
+		});
+		$(baseElement).children("#lvl6").append('<div id="spellContainer"></div>');
+		for(var i = 0; i < this.contents.length; i++)
+		{
+			if(this.contents[i].level == 6)
+				$(baseElement).children("#lvl6").children("#spellContainer").append(this.contents[i].toHTML());
+		}
+		$(baseElement).children("#lvl6").append($("<input type='button' id='addSpell' charId='" + this.ownerId + "' value='New Spell'/>"));
+		$(baseElement).children("#lvl6").append("<br>");
+		$(baseElement).children("#lvl6").find("#addSpell").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			var spell = new SpellObject();
+			spell.level = 6;
+			event.data.obj.contents.push(spell);
+			saveAll();
+			event.stopImmediatePropagation()
+			return false;
+		});
+		
+		$(baseElement).append('<div id="lvl7"><div class="inventoryItemNameLabel">Level 7 Slots: ' + this.lvl7slots + '</div></div>');
+		$(baseElement).children("#lvl7").append('<input type="button" id="addSlot" value="+"/>');
+		$(baseElement).children("#lvl7").find("#addSlot").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			event.data.obj.lvl7slots++;
+			saveAll();
+			event.stopImmediatePropagation()
+			return false;
+		});
+		$(baseElement).children("#lvl7").append('<input type="button" id="remSlot" value="-"/>');
+		$(baseElement).children("#lvl7").find("#remSlot").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			event.data.obj.lvl7slots--;
+			saveAll();
+			event.stopImmediatePropagation()
+			return false;
+		});
+		$(baseElement).children("#lvl7").append('<div id="spellContainer"></div>');
+		for(var i = 0; i < this.contents.length; i++)
+		{
+			if(this.contents[i].level == 7)
+				$(baseElement).children("#lvl7").children("#spellContainer").append(this.contents[i].toHTML());
+		}
+		$(baseElement).children("#lvl7").append($("<input type='button' id='addSpell' charId='" + this.ownerId + "' value='New Spell'/>"));
+		$(baseElement).children("#lvl7").append("<br>");
+		$(baseElement).children("#lvl7").find("#addSpell").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			var spell = new SpellObject();
+			spell.level = 7;
+			event.data.obj.contents.push(spell);
+			saveAll();
+			event.stopImmediatePropagation()
+			return false;
+		});
+		
+		$(baseElement).append('<div id="lvl8"><div class="inventoryItemNameLabel">Level 8 Slots: ' + this.lvl8slots + '</div></div>');
+		$(baseElement).children("#lvl8").append('<input type="button" id="addSlot" value="+"/>');
+		$(baseElement).children("#lvl8").find("#addSlot").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			event.data.obj.lvl8slots++;
+			saveAll();
+			event.stopImmediatePropagation()
+			return false;
+		});
+		$(baseElement).children("#lvl8").append('<input type="button" id="remSlot" value="-"/>');
+		$(baseElement).children("#lvl8").find("#remSlot").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			event.data.obj.lvl8slots--;
+			saveAll();
+			event.stopImmediatePropagation()
+			return false;
+		});
+		$(baseElement).children("#lvl8").append('<div id="spellContainer"></div>');
+		for(var i = 0; i < this.contents.length; i++)
+		{
+			if(this.contents[i].level == 8)
+				$(baseElement).children("#lvl8").children("#spellContainer").append(this.contents[i].toHTML());
+		}
+		$(baseElement).children("#lvl8").append($("<input type='button' id='addSpell' charId='" + this.ownerId + "' value='New Spell'/>"));
+		$(baseElement).children("#lvl8").append("<br>");
+		$(baseElement).children("#lvl8").find("#addSpell").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			var spell = new SpellObject();
+			spell.level = 8;
+			event.data.obj.contents.push(spell);
+			saveAll();
+			event.stopImmediatePropagation()
+			return false;
+		});
+		
+		$(baseElement).append('<div id="lvl9"><div class="inventoryItemNameLabel">Level 9 Slots: ' + this.lvl9slots + '</div></div>');
+		$(baseElement).children("#lvl9").append('<input type="button" id="addSlot" value="+"/>');
+		$(baseElement).children("#lvl9").find("#addSlot").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			event.data.obj.lvl9slots++;
+			saveAll();
+			event.stopImmediatePropagation()
+			return false;
+		});
+		$(baseElement).children("#lvl9").append('<input type="button" id="remSlot" value="-"/>');
+		$(baseElement).children("#lvl9").find("#remSlot").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			event.data.obj.lvl9slots--;
+			saveAll();
+			event.stopImmediatePropagation()
+			return false;
+		});
+		$(baseElement).children("#lvl9").append('<div id="spellContainer"></div>');
+		for(var i = 0; i < this.contents.length; i++)
+		{
+			if(this.contents[i].level == 9)
+				$(baseElement).children("#lvl9").children("#spellContainer").append(this.contents[i].toHTML());
+		}
+		$(baseElement).children("#lvl9").append($("<input type='button' id='addSpell' charId='" + this.ownerId + "' value='New Spell'/>"));
+		$(baseElement).children("#lvl9").append("<br>");
+		$(baseElement).children("#lvl9").find("#addSpell").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			var spell = new SpellObject();
+			spell.level = 9;
+			event.data.obj.contents.push(spell);
+			saveAll();
+			event.stopImmediatePropagation()
+			return false;
+		});
+		
+		return $(baseElement);
+	}
+	
+	this.removeDeleted = function()
+	{
+		if(this.contents != null)
+		{
+			var newContents = [];
+			
+			for(var i = 0; i < this.contents.length; i++)
+			{
+				if(!this.contents[i].isDeleted)
+					newContents.push(this.contents[i]);
+			}
+			
+			this.contents = newContents;
+		}
+	}
+}
+
+function SpellObject()
+{
+	this.name = "New Spell";
+	this.prepared = false;
+	this.isDeleted = false;
+	this.level = 0;
+	
+	this.V = false;
+	this.S = false;
+	this.M = "";
+	
+	this.allowRitual = false;
+	
+	this.toHTML = function()
+	{
+		var baseElement = $('<div class="spellObject"></div>');
+		$(baseElement).append('<input type="button" id="prepared" style="' + (this.prepared? "background-color: green;" : "background-color: red;") + '"/>');
+		$(baseElement).find("#prepared").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			event.data.obj.prepared = !event.data.obj.prepared;
+			saveAll();
+			event.stopImmediatePropagation()
+			return false;
+		});
+		
+		$(baseElement).append('<div id="spellName">' + this.name + '</div>');
+		$(baseElement).append('<div id="spellComponents">(' + (this.V? "V" : "") + (this.S? "S" : "") + (this.M != ""? "M:[" + this.M + ']' : "") + (this.allowRitual? "(ritual)" : "") + ')</div>');
+		
+		$(baseElement).append('<div id="editFields"></div>');
+		
+		$(baseElement).children("#editFields").append('<input type="text" id="editedName" value="' + this.name + '"/><br>');
+		$(baseElement).children("#editFields").append('<input type="checkbox" id="editedV"' + (this.V? "checked" : "") + '/>V<br>');
+		$(baseElement).children("#editFields").append('<input type="checkbox" id="editedS"' + (this.S? "checked" : "") + '/>S<br>');
+		$(baseElement).children("#editFields").append('<input type="text" id="editedM" value="' + this.M + '"/>M<br>');
+		$(baseElement).children("#editFields").append('Ritual: <input type="checkbox" id="editedRitual"' + (this.allowRitual? "checked" : "") + '/>Ritual<br>');
+		
+		$(baseElement).children("#editFields").append($("<input type='button' id='saveBtn' charId='" + this.ownerId + "' value='Save'/>"));
+		$(baseElement).children("#editFields").append("<br>");
+		$(baseElement).children("#editFields").find("#saveBtn").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			event.data.obj.name = $(event.data.baseE).children("#editFields").children("#editedName").val();
+			event.data.obj.V = $(event.data.baseE).children("#editFields").children("#editedV")[0].checked;
+			event.data.obj.S = $(event.data.baseE).children("#editFields").children("#editedS")[0].checked;
+			event.data.obj.M = $(event.data.baseE).children("#editFields").children("#editedM").val();
+			event.data.obj.allowRitual = $(event.data.baseE).children("#editFields").children("#editedRitual")[0].checked;
+			saveAll();
+			event.stopImmediatePropagation()
+			return false;
+		});
+		
+		$(baseElement).children("#editFields").hide();
+		
+		$(baseElement).append($("<input type='button' id='editBtn' charId='" + this.ownerId + "' value='Edit'/>"));
+		$(baseElement).append("<br>");
+		$(baseElement).find("#editBtn").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			$(event.data.baseE).children("#spellName").hide();
+			$(event.data.baseE).children("#spellComponents").hide();
+			$(event.data.baseE).children("#editFields").show();
+			
+			$(event.data.baseE).children("#editBtn").hide();
+			
+			event.stopImmediatePropagation()
+			return false;
+		});
+		
+		$(baseElement).append($("<input type='button' id='saveNameBtn' charId='" + this.ownerId + "' value='Save'/>"));
+		$(baseElement).find("#saveNameBtn").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			event.data.obj.name = $(event.data.baseE).children("#nameEditable").val(); 
+			saveAll();
+			
+			event.stopImmediatePropagation()
+			return false;
+		});
+		
+		$(baseElement).children("#saveNameBtn").hide();
+		
+		return $(baseElement);
+	}
 }
 
 function InventoryObject(ownerId, name, description, quantity, weight, canContain, contents)
@@ -565,7 +1086,7 @@ function InventoryObject(ownerId, name, description, quantity, weight, canContai
 			$(baseElement).append($("<div class='inventoryItemField'>" + this.weight + "kg (total: " + this.getTotalWeight() + "kg)</div>"));
 		}
 		
-		$(baseElement).append($("<div class='inventoryItemField', id='description'>" + this.description.replace(/\r?\n/g, '<br />') + "</div>"));
+		$(baseElement).append($("<div class='inventoryItemField inventoryItemDescription', id='description'>" + this.description.replace(/\r?\n/g, '<br />') + "</div>"));
 		
 		if(!this.isRoot)
 		{

@@ -25,6 +25,7 @@ class Character
 		$this->status = new Collection();
 		$this->status->currentHealth = (int)$d[$this->next()];
 		$this->status->maxHitPoints = (int)$d[$this->next()];
+		$this->spells = $d[$this->next()];
 	}
 	
 	function next()

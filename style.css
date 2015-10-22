@@ -1,3 +1,44 @@
+#spellBook
+{
+	width: calc(20% - 20px);
+	height: auto;
+	border: 1px solid black;
+	overflow: auto;
+	margin: 5px;
+	background-color: silver;
+}
+
+#delete2{float: left;}
+#delete3{float: left;}
+#delete4{float: left;}
+#delete5{float: left;}
+
+#spellContainer
+{
+	border: 1px solid black;
+	margin: 5px;
+	background-color: grey;
+	overflow: auto;
+}
+
+#spellComponents
+{
+	background-color: silver;
+	border: 1px solid black;
+	margin: 3px;
+	width: auto;
+	overflow: auto;
+}
+
+#spellName
+{
+	border: 1px solid black;
+	margin: 3px;
+	background-color: silver;
+	display: inline;
+	width: auto;
+}
+
 .loginScreenInput
 {
 	float: left;
@@ -17,6 +58,7 @@
 	background-color: grey;
 	margin-bottom: 30px;
 	overflow: auto;
+	height: auto;
 }
 
 .charCategory
@@ -50,10 +92,15 @@
 	overflow: auto;
 }
 
+.newItem
+{
+	float: left;
+}
+
 .inventory
 {
 	float: left;
-	width: 99%;
+	width: 80%;
 	height: auto;
 	overflow: auto;
 }
@@ -83,4 +130,10 @@
 	/*overflow-y: scroll;*/
 	overflow: auto;
 	margin: 5px;
+}
+
+.inventoryItemDescription
+{
+	max-height: 300px;
+	overflow-y: scroll;
 }

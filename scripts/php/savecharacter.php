@@ -14,7 +14,8 @@ $bigassSQL = "UPDATE `characters` SET"
 		. "`inventory` = '" . addslashes($char->data->inventory) . "',"
 		. "`age` = '" . $char->data->info->age . "',"
 		. "`currenthealth` = '" . $char->data->status->currentHealth . "',"
-		. "`maxhitpoints` = '" . $char->data->status->maxHitPoints . "'"
+		. "`maxhitpoints` = '" . $char->data->status->maxHitPoints . "',"
+		. "`spells` = '" . addslashes($char->data->spells) . "'"
 		. "WHERE `id` = '" . $char->data->id . "';";
 		
 $connection = Connect();
