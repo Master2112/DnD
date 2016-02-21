@@ -218,7 +218,49 @@ function populateCharacterDiv(charData)
 	}); //end edit
 	
 	//begin edit
-	$("#char" + character.data.id).children("#basicInfo").append($("<div class=charField id='exp'>Experience: " + character.data.info.experience + " </div>"));
+	
+	var level = 1;
+	
+	if(character.data.info.experience > 300)
+		level = 2;
+	if(character.data.info.experience > 900)
+		level = 3;
+	if(character.data.info.experience > 2700)
+		level = 4;
+	if(character.data.info.experience > 6500)
+		level = 5;
+	if(character.data.info.experience > 14000)
+		level = 6;
+	if(character.data.info.experience > 23000)
+		level = 7;
+	if(character.data.info.experience > 34000)
+		level = 8;
+	if(character.data.info.experience > 48000)
+		level = 9;
+	if(character.data.info.experience > 64000)
+		level = 10;
+	if(character.data.info.experience > 85000)
+		level = 11;
+	if(character.data.info.experience > 100000)
+		level = 12;
+	if(character.data.info.experience > 120000)
+		level = 13;
+	if(character.data.info.experience > 140000)
+		level = 14;
+	if(character.data.info.experience > 165000)
+		level = 15;
+	if(character.data.info.experience > 195000)
+		level = 16;
+	if(character.data.info.experience > 225000)
+		level = 17;
+	if(character.data.info.experience > 265000)
+		level = 18;
+	if(character.data.info.experience > 305000)
+		level = 19;
+	if(character.data.info.experience > 355000)
+		level = 20;
+	
+	$("#char" + character.data.id).children("#basicInfo").append($("<div class=charField id='exp'>Experience: " + character.data.info.experience + " (Lv " + level + ") </div>"));
 	$("#char" + character.data.id).children("#basicInfo").append($("<input type='number' class=charField id='expEditable' style='display: none;' value='" + character.data.info.experience + "'/>"));
 	
 	$("#char" + character.data.id).children("#basicInfo").children("#exp").append($("<input type='button' id='editexpBtn' charId='" + this.ownerId + "' value='Edit'/>"));
@@ -308,7 +350,7 @@ function populateCharacterDiv(charData)
 	$("#char" + charData.id).append(character.tempSpells.toHTML());
 	
 	//New Item
-	$("#char" + charData.id).children(".inventoryItem").append("<br>");
+	/*$("#char" + charData.id).children(".inventoryItem").append("<br>");
 	$("#char" + charData.id).children(".inventoryItem").append($("<div class='inventoryItem newItem' id='newItemFor" + charData.id + "'></div>"));
 	
 	$("#newItemFor" + charData.id).append("<br>New Item Parameters<br>");
@@ -322,7 +364,7 @@ function populateCharacterDiv(charData)
 	$("#newItemFor" + charData.id).append($("<input type='text' placeholder='Description and Effects' id='description'/>"));
 	$("#newItemFor" + charData.id).append("<br>Is a container?: ");
 	$("#newItemFor" + charData.id).append($("<input type='checkbox' id='container'/>"));
-	
+	*/
 	console.log("ending chartest");
 }
 
@@ -421,7 +463,7 @@ function Character(json)
 	this.saveSpells = function()
 	{
 		console.log("Saving spells");
-		
+		this.tempSpells.removeDeleted();
 		//this.tempInventory.removeDeleted();
 		
 		var spellsAsJson = JSON.stringify(this.tempSpells)
@@ -467,6 +509,7 @@ function Character(json)
 		this.tempSpells = $.extend(true, new SpellBookObject(), this.tempSpells);
 		
 		this.tempSpells.fixSpellTypes();
+		this.tempSpells.removeDeleted();
 		
 		console.log(this.tempSpells);
 	}
@@ -886,6 +929,7 @@ function SpellObject()
 	this.prepared = false;
 	this.isDeleted = false;
 	this.level = 0;
+	this.url = "";
 	
 	this.V = false;
 	this.S = false;
@@ -905,12 +949,17 @@ function SpellObject()
 			return false;
 		});
 		
-		$(baseElement).append('<div id="spellName">' + this.name + '</div>');
+		if(this.url != "")			
+			$(baseElement).append('<div id="spellName"><a target="blank" href="' + this.url + '">' + this.name + '</a></div>');
+		else
+			$(baseElement).append('<div id="spellName">' + this.name + '</div>');
+		
 		$(baseElement).append('<div id="spellComponents">(' + (this.V? "V" : "") + (this.S? "S" : "") + (this.M != ""? "M:[" + this.M + ']' : "") + (this.allowRitual? "(ritual)" : "") + ')</div>');
 		
 		$(baseElement).append('<div id="editFields"></div>');
 		
 		$(baseElement).children("#editFields").append('<input type="text" id="editedName" value="' + this.name + '"/><br>');
+		$(baseElement).children("#editFields").append('<input type="text" placeholder="URL to Spell Details (optional)" id="editedUrl" value="' + this.url + '"/><br>');
 		$(baseElement).children("#editFields").append('<input type="checkbox" id="editedV"' + (this.V? "checked" : "") + '/>V<br>');
 		$(baseElement).children("#editFields").append('<input type="checkbox" id="editedS"' + (this.S? "checked" : "") + '/>S<br>');
 		$(baseElement).children("#editFields").append('<input type="text" id="editedM" value="' + this.M + '"/>M<br>');
@@ -921,18 +970,20 @@ function SpellObject()
 		$(baseElement).children("#editFields").find("#saveBtn").on("click", {obj: this, baseE: baseElement}, function(event)
 		{
 			event.data.obj.name = $(event.data.baseE).children("#editFields").children("#editedName").val();
+			event.data.obj.url = $(event.data.baseE).children("#editFields").children("#editedUrl").val();
 			event.data.obj.V = $(event.data.baseE).children("#editFields").children("#editedV")[0].checked;
 			event.data.obj.S = $(event.data.baseE).children("#editFields").children("#editedS")[0].checked;
 			event.data.obj.M = $(event.data.baseE).children("#editFields").children("#editedM").val();
 			event.data.obj.allowRitual = $(event.data.baseE).children("#editFields").children("#editedRitual")[0].checked;
 			saveAll();
-			event.stopImmediatePropagation()
+			event.stopImmediatePropagation();
 			return false;
 		});
 		
 		$(baseElement).children("#editFields").hide();
 		
 		$(baseElement).append($("<input type='button' id='editBtn' charId='" + this.ownerId + "' value='Edit'/>"));
+		$(baseElement).append($("<input type='button' id='deleteBtn' charId='" + this.ownerId + "' value='Delete'/>"));
 		$(baseElement).append("<br>");
 		$(baseElement).find("#editBtn").on("click", {obj: this, baseE: baseElement}, function(event)
 		{
@@ -942,7 +993,15 @@ function SpellObject()
 			
 			$(event.data.baseE).children("#editBtn").hide();
 			
-			event.stopImmediatePropagation()
+			event.stopImmediatePropagation();
+			return false;
+		});
+		
+		$(baseElement).find("#deleteBtn").on("click", {obj: this, baseE: baseElement}, function(event)
+		{
+			event.data.obj.isDeleted = true;
+			saveAll();
+			event.stopImmediatePropagation();
 			return false;
 		});
 		
@@ -952,7 +1011,7 @@ function SpellObject()
 			event.data.obj.name = $(event.data.baseE).children("#nameEditable").val(); 
 			saveAll();
 			
-			event.stopImmediatePropagation()
+			event.stopImmediatePropagation();
 			return false;
 		});
 		
@@ -1022,13 +1081,15 @@ function InventoryObject(ownerId, name, description, quantity, weight, canContai
 			
 			if(!this.canContain)
 			{
-				$(baseElement).append($("<input type='button' id='addOneBtn' charId='" + this.ownerId + "' value='+'/>"));
-				$(baseElement).append($("<input type='button' id='remOneBtn' charId='" + this.ownerId + "' value='-'/>"));
+				$(baseElement).append($("<input type='button' id='addOneBtn' charId='" + this.ownerId + "' value='+1'/>"));
+				$(baseElement).append($("<input type='button' id='remOneBtn' charId='" + this.ownerId + "' value='-1'/>"));
+				$(baseElement).append($("<input type='button' id='addTenBtn' charId='" + this.ownerId + "' value='+10'/>"));
+				$(baseElement).append($("<input type='button' id='remTenBtn' charId='" + this.ownerId + "' value='-10'/>"));
 			}
 			
-			$(baseElement).append($("<input type='button' id='editNameBtn' charId='" + this.ownerId + "' value='Edit Name'/>"));
+			//$(baseElement).append($("<input type='button' id='editNameBtn' charId='" + this.ownerId + "' value='Edit Name'/>"));
 			$(baseElement).append("<br>");
-			$(baseElement).find("#editNameBtn").on("click", {obj: this, baseE: baseElement}, function(event)
+			$(baseElement).find("#name").on("click", {obj: this, baseE: baseElement}, function(event)
 			{
 				$(event.data.baseE).children("#name").hide();
 				$(event.data.baseE).children("#nameEditable").show();
@@ -1074,6 +1135,31 @@ function InventoryObject(ownerId, name, description, quantity, weight, canContai
 				console.log(event.data.obj);
 				
 				event.data.obj.quantity--;
+				saveAll();
+				
+				event.stopImmediatePropagation()
+				return false;
+			});
+			
+			$(baseElement).find("#addTenBtn").on("click", {obj: this}, function(event)
+			{
+				console.log("Increasing item quantity by ten");
+				console.log(event.data.obj);
+				
+				event.data.obj.quantity -= -10;
+				saveAll();
+				
+				event.stopImmediatePropagation()
+				return false;
+			});
+			
+			
+			$(baseElement).find("#remTenBtn").on("click", {obj: this}, function(event)
+			{
+				console.log("Decreasing item quantity by ten");
+				console.log(event.data.obj);
+				
+				event.data.obj.quantity -= 10;
 				saveAll();
 				
 				event.stopImmediatePropagation()
@@ -1136,13 +1222,24 @@ function InventoryObject(ownerId, name, description, quantity, weight, canContai
 			}
 			
 			$(baseElement).append("<br>");
-			$(baseElement).append($("<input type='button' id='addBtn' charId='" + this.ownerId + "' value='Add new item here'/>"));
+			$(baseElement).append($("<input type='button' id='addBtn' charId='" + this.ownerId + "' value='New Item'/>"));
 			$(baseElement).find("#addBtn").on("click", {obj: this}, function(event)
 			{
 				console.log("attempting adding a new item");
 				console.log(event.data.obj);
 										
 				event.data.obj.addNewObject($(this).attr("charId"));
+				
+				event.stopImmediatePropagation()
+				return false;
+			});
+			$(baseElement).append($("<input type='button' id='addContBtn' charId='" + this.ownerId + "' value='New Container'/>"));
+			$(baseElement).find("#addContBtn").on("click", {obj: this}, function(event)
+			{
+				console.log("attempting adding a new container");
+				console.log(event.data.obj);
+										
+				event.data.obj.addNewContainer($(this).attr("charId"));
 				
 				event.stopImmediatePropagation()
 				return false;
@@ -1224,11 +1321,30 @@ function InventoryObject(ownerId, name, description, quantity, weight, canContai
 	{
 		var newItemElement = $("#newItemFor" + this.ownerId);
 		var newObj = new InventoryObject(charid, //"tempName", "tempDescr", 1, 2, true);
-										$(newItemElement).find("#name").val(),
-										$(newItemElement).find("#description").val(),
-										$(newItemElement).find("#quantity").val(),
-										$(newItemElement).find("#weight").val(),
-										$(newItemElement).find("#container")[0].checked);
+										"Item",
+										"",
+										1,
+										0,
+										false);
+		
+		if(newObj.canContain)
+			newObj.quantity = 1;
+		
+		console.log("Toggle value:");
+		console.log($(newItemElement).find("#container")[0].checked);
+		
+		this.addToInventory(newObj);
+	}
+	
+	this.addNewContainer = function(charid)
+	{
+		var newItemElement = $("#newItemFor" + this.ownerId);
+		var newObj = new InventoryObject(charid, //"tempName", "tempDescr", 1, 2, true);
+										"Container",
+										"",
+										1,
+										0,
+										true);
 		
 		if(newObj.canContain)
 			newObj.quantity = 1;
