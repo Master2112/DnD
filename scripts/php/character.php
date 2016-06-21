@@ -7,25 +7,14 @@ class Character
 	function __construct($d) //order of variables MUST match database field order
 	{
 		$this->curr = 0;
-		$this->id = (int)$d[$this->next()];
+		$this->id = (int)$d[0];
 		
-		$this->info = new Collection();
-		$this->info->name = $d[$this->next()];
+		$this->name = $d[1];
 		
-		$this->ownerId = (int)$d[$this->next()];
+		$this->ownerId = (int)$d[2];
 		
-		$this->info->experience = (int)$d[$this->next()];
-		
-		$this->info->level = 1; //TODO: Calc from experience
-		
-		$this->inventory = $d[$this->next()];
-		
-		$this->info->age = $d[$this->next()];
-		
-		$this->status = new Collection();
-		$this->status->currentHealth = (int)$d[$this->next()];
-		$this->status->maxHitPoints = (int)$d[$this->next()];
-		$this->spells = $d[$this->next()];
+		$this->inventory = $d[3];
+		$this->spells = $d[4];
 	}
 	
 	function next()

@@ -8,13 +8,9 @@ $char = json_decode($charJson);
 //var_dump($char);
 
 $bigassSQL = "UPDATE `characters` SET"
-		. "`name` = '" . addslashes($char->data->info->name) . "',"
+		. "`name` = '" . addslashes($char->data->name) . "',"
 		. "`ownerid` = '" . $char->data->ownerId . "',"
-		. "`experiencepoints` = '" . $char->data->info->experience . "',"
 		. "`inventory` = '" . addslashes($char->data->inventory) . "',"
-		. "`age` = '" . $char->data->info->age . "',"
-		. "`currenthealth` = '" . $char->data->status->currentHealth . "',"
-		. "`maxhitpoints` = '" . $char->data->status->maxHitPoints . "',"
 		. "`spells` = '" . addslashes($char->data->spells) . "'"
 		. "WHERE `id` = '" . $char->data->id . "';";
 		

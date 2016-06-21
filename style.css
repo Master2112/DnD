@@ -3,7 +3,7 @@
 	width: calc(20% - 20px);
 	height: auto;
 	border: 1px solid black;
-	overflow: auto;
+	overflow: hidden;
 	margin: 5px;
 	background-color: silver;
 }
@@ -18,7 +18,7 @@
 	border: 1px solid black;
 	margin: 5px;
 	background-color: grey;
-	overflow: auto;
+	overflow: hidden;
 }
 
 #spellComponents
@@ -89,7 +89,7 @@
 	padding-top: 5px;
 	margin: 5px;
 	border: 1px solid black;
-	overflow: auto;
+	overflow: hidden;
 }
 
 .newItem
@@ -102,7 +102,15 @@
 	float: left;
 	width: 80%;
 	height: auto;
-	overflow: auto;
+	overflow: hidden;
+}
+
+.inventoryWide
+{
+	float: left;
+	width: calc(100% - 20px);
+	height: auto;
+	overflow: hidden;
 }
 
 .inventoryItemField
